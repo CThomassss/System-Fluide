@@ -32,12 +32,12 @@ export function calculateTargetCalories(tdee: number, goal: Goal): number {
   return tdee + GOAL_ADJUSTMENTS[goal];
 }
 
-export function calculatePillars(tdee: number) {
-  // Approximate pillar decomposition of TDEE
-  const bmr = Math.round(tdee * 0.65);
-  const neat = Math.round(tdee * 0.20);
-  const eat = Math.round(tdee * 0.10);
-  const tef = tdee - bmr - neat - eat; // remainder to avoid rounding issues
+export function calculatePillars(tdee: number, bmr: number) {
+  // Use real BMR; TEF ≈ 10% of intake; split remainder into NEAT/EAT (2:1)
+  const tef = Math.round(tdee * 0.10);
+  const remaining = tdee - bmr - tef;
+  const neat = Math.round(remaining * 0.67);
+  const eat = remaining - neat; // remainder to avoid rounding issues
   return { bmr, neat, eat, tef };
 }
 
@@ -113,7 +113,7 @@ export function computeAll(
   const bmr = calculateBMR(sex, weight, height, age);
   const tdee = calculateTDEE(bmr, activityLevel);
   const targetCalories = calculateTargetCalories(tdee, goal);
-  const pillars = calculatePillars(tdee);
+  const pillars = calculatePillars(tdee, bmr);
   const { macros, macroGrams } = calculateMacros(targetCalories, weight, goal);
 
   return { bmr, tdee, targetCalories, pillars, macros, macroGrams };
