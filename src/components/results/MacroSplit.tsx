@@ -9,9 +9,9 @@ interface MacroSplitProps {
 }
 
 const bars = [
-  { key: "protein" as const, color: "bg-orange" },
+  { key: "protein" as const, color: "bg-accent" },
   { key: "carbs" as const, color: "bg-green" },
-  { key: "fat" as const, color: "bg-orange-light" },
+  { key: "fat" as const, color: "bg-accent-muted" },
 ];
 
 export function MacroSplit({ macros, macroGrams }: MacroSplitProps) {
@@ -19,7 +19,7 @@ export function MacroSplit({ macros, macroGrams }: MacroSplitProps) {
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("macros_title")}</h3>
+      <h3 className="font-display text-xl font-bold">{t("macros_title")}</h3>
       <div className="mt-6 space-y-5">
         {bars.map(({ key, color }, i) => (
           <motion.div
@@ -29,7 +29,7 @@ export function MacroSplit({ macros, macroGrams }: MacroSplitProps) {
             transition={{ delay: i * 0.1 }}
           >
             <div className="flex items-center justify-between text-sm">
-              <span className="font-condensed font-semibold">{t(key)}</span>
+              <span className="font-display font-semibold">{t(key)}</span>
               <span className="text-foreground/60">
                 {macroGrams[key]}{t("grams_short")} · {macros[key]}%
               </span>

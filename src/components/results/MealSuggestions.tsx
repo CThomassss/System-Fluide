@@ -5,20 +5,36 @@ import { motion } from "framer-motion";
 import { UtensilsCrossed } from "lucide-react";
 import { scaleMeals } from "@/lib/calculations";
 
-interface MealSuggestionsProps {
-  targetCalories: number;
+interface MacroGrams {
+  protein: number;
+  fat: number;
+  carbs: number;
 }
 
-export function MealSuggestions({ targetCalories }: MealSuggestionsProps) {
+interface MealSuggestionsProps {
+  targetCalories: number;
+  macroGrams?: MacroGrams;
+}
+
+export function MealSuggestions({ targetCalories, macroGrams }: MealSuggestionsProps) {
   const t = useTranslations("results");
   const meals = scaleMeals(targetCalories);
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("meals_title")}</h3>
+      <h3 className="font-display text-xl font-bold">{t("meals_title")}</h3>
       <p className="mt-1 text-sm text-foreground/50">
         {t("meals_scaled_for", { calories: targetCalories })}
       </p>
+
+      {macroGrams && (
+        <div className="mt-3 flex flex-wrap gap-3">
+          <MacroPill label={t("protein")} grams={macroGrams.protein} color="bg-accent/20 text-accent" />
+          <MacroPill label={t("carbs")} grams={macroGrams.carbs} color="bg-green/20 text-green" />
+          <MacroPill label={t("fat")} grams={macroGrams.fat} color="bg-blue-400/20 text-blue-400" />
+        </div>
+      )}
+
       <div className="mt-4 space-y-4">
         {meals.map(({ slot, items }, i) => (
           <motion.div
@@ -29,8 +45,8 @@ export function MealSuggestions({ targetCalories }: MealSuggestionsProps) {
             transition={{ delay: i * 0.08 }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <UtensilsCrossed size={16} className="text-orange shrink-0" />
-              <span className="font-condensed font-semibold text-sm">
+              <UtensilsCrossed size={16} className="text-foreground shrink-0" />
+              <span className="font-display font-semibold text-sm">
                 {t(`slot_${slot}`)}
               </span>
             </div>
@@ -46,5 +62,13 @@ export function MealSuggestions({ targetCalories }: MealSuggestionsProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+function MacroPill({ label, grams, color }: { label: string; grams: number; color: string }) {
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${color}`}>
+      {label} {grams}g
+    </span>
   );
 }

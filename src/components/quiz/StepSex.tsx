@@ -15,7 +15,7 @@ export function StepSex({ value, dispatch }: StepSexProps) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-condensed text-2xl font-bold">{t("step_sex_title")}</h2>
+        <h2 className="font-display text-2xl font-bold">{t("step_sex_title")}</h2>
         <p className="mt-1 text-sm text-foreground/60">{t("step_sex_desc")}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t("step_sex_title")}>

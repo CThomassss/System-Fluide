@@ -39,30 +39,30 @@ export default function LoginPage() {
       <Header />
       <main className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="w-full max-w-sm rounded-2xl border border-surface-light bg-surface p-6">
-          <h1 className="font-condensed text-2xl font-bold text-center">{t("login_title")}</h1>
+          <h1 className="font-display text-2xl font-bold text-center">{t("login_title")}</h1>
           <p className="mt-1 text-center text-sm text-foreground/60">{t("login_subtitle")}</p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold font-condensed">{t("email")}</label>
+              <label htmlFor="email" className="block text-sm font-semibold font-display">{t("email")}</label>
               <input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+                className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold font-condensed">{t("password")}</label>
+              <label htmlFor="password" className="block text-sm font-semibold font-display">{t("password")}</label>
               <input
                 id="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+                className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
               />
             </div>
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
           <p className="mt-4 text-center text-sm text-foreground/60">
             {t("no_account")}{" "}
-            <Link href="/auth/signup" className="text-orange hover:underline">
+            <Link href="/auth/signup" className="text-foreground hover:underline">
               {t("signup_link")}
             </Link>
           </p>

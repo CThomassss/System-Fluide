@@ -15,7 +15,7 @@ export function ExerciseRecommendations({ training, goal }: ExerciseRecommendati
 
   const sessionsPerWeek = training.days.length;
   const allMuscles = [...new Set(training.days.flatMap((d) => d.muscles))];
-  const weeklyVolume = training.setsPerSession * sessionsPerWeek;
+  const weeklyVolume = training.exercisesPerSession * sessionsPerWeek;
   const setsPerMuscle = allMuscles.length > 0
     ? Math.round(weeklyVolume / allMuscles.length)
     : 0;
@@ -30,7 +30,7 @@ export function ExerciseRecommendations({ training, goal }: ExerciseRecommendati
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("exercises_title")}</h3>
+      <h3 className="font-display text-xl font-bold">{t("exercises_title")}</h3>
 
       <div className="mt-4 space-y-3">
         <motion.div
@@ -56,7 +56,7 @@ export function ExerciseRecommendations({ training, goal }: ExerciseRecommendati
             volumeStatus === "optimal"
               ? "bg-green/10"
               : volumeStatus === "low"
-                ? "bg-orange/10"
+                ? "bg-accent/10"
                 : "bg-red-500/10"
           }`}
           initial={{ opacity: 0, x: -10 }}

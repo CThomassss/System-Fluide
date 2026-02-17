@@ -3,10 +3,20 @@
 -- Profiles table (auto-created on signup via trigger)
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
+  first_name text,
+  last_name text,
+  sex text,
+  height numeric(5,1),
+  weight numeric(5,1),
+  age integer,
+  activity_level text,
   goal text,
   target_calories integer,
   tdee integer,
   bmr integer,
+  training_data text,       -- JSON encoded quiz training params
+  custom_meals text,        -- JSON: coach-assigned custom meal plan (overrides computed)
+  role text default 'user', -- 'user' or 'admin'
   created_at timestamptz default now()
 );
 
@@ -23,6 +33,26 @@ create policy "Users can update own profile"
 create policy "Users can insert own profile"
   on public.profiles for insert
   with check (auth.uid() = id);
+
+-- Admin can view all profiles
+create policy "Admin can view all profiles"
+  on public.profiles for select
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can update all profiles
+create policy "Admin can update all profiles"
+  on public.profiles for update
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
 
 -- Daily entries table
 create table if not exists public.daily_entries (

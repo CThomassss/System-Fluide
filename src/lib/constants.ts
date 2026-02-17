@@ -68,13 +68,6 @@ export const BASE_MEALS: BaseMeal[] = [
     ],
   },
   {
-    slot: "snack1",
-    items: [
-      { key: "greek_yogurt", grams: 150 },
-      { key: "almonds", grams: 30 },
-    ],
-  },
-  {
     slot: "lunch",
     items: [
       { key: "chicken_breast", grams: 150 },
@@ -83,10 +76,12 @@ export const BASE_MEALS: BaseMeal[] = [
     ],
   },
   {
-    slot: "snack2",
+    slot: "preworkout",
     items: [
+      { key: "cream_of_rice", grams: 80 },
       { key: "whey_shake", grams: 30 },
-      { key: "apple", grams: 150 },
+      { key: "milk", grams: 200 },
+      { key: "raspberries", grams: 50 },
     ],
   },
   {

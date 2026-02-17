@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
 import { useQuiz } from "@/hooks/useQuiz";
 import { useRouter } from "@/i18n/navigation";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -12,18 +11,6 @@ import { StepPersonalInfo } from "./StepPersonalInfo";
 import { StepActivity } from "./StepActivity";
 import { StepTraining } from "./StepTraining";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-
-const variants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 80 : -80,
-    opacity: 0,
-  }),
-  center: { x: 0, opacity: 1 },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 80 : -80,
-    opacity: 0,
-  }),
-};
 
 export function QuizShell() {
   const t = useTranslations("quiz");
@@ -52,7 +39,7 @@ export function QuizShell() {
           state.training !== null &&
           state.training.days.length > 0 &&
           state.training.days.every((d) => d.muscles.length > 0) &&
-          state.training.setsPerSession > 0
+          state.training.exercisesPerSession > 0
         );
       default:
         return false;
@@ -74,7 +61,7 @@ export function QuizShell() {
         w: String(state.weight),
         al: state.activityLevel!,
         d: dParam,
-        ss: String(state.training!.setsPerSession),
+        ex: String(state.training!.exercisesPerSession),
       });
       router.push(`/results?${params.toString()}`);
     } else {
@@ -97,27 +84,15 @@ export function QuizShell() {
   ];
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-6">
       <ProgressBar current={state.step} total={totalSteps} />
 
-      <p className="mt-4 text-center text-sm text-foreground/50 font-condensed">
+      <p className="mt-4 text-center text-sm text-foreground/50 font-display">
         {t("progress", { step: state.step + 1, total: totalSteps })}
       </p>
 
-      <div className="mt-8 overflow-hidden">
-        <AnimatePresence mode="wait" custom={1}>
-          <motion.div
-            key={state.step}
-            custom={1}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            {steps[state.step]}
-          </motion.div>
-        </AnimatePresence>
+      <div key={state.step} className="mt-8 animate-fade-in">
+        {steps[state.step]}
       </div>
 
       <div className="mt-10 flex items-center justify-between">

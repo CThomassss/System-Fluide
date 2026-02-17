@@ -1,24 +1,23 @@
 import type { ReactNode } from "react";
-import { Barlow, Barlow_Condensed } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const barlow = Barlow({
-  variable: "--font-barlow",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
-const barlowCondensed = Barlow_Condensed({
-  variable: "--font-barlow-condensed",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html className="dark">
       <body
-        className={`${barlow.variable} ${barlowCondensed.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased bg-background text-foreground`}
       >
         {children}
       </body>

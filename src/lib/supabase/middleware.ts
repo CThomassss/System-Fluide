@@ -29,9 +29,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /suivi route — redirect unauthenticated users to login
+  // Protect authenticated routes — redirect unauthenticated users to login
   const pathname = request.nextUrl.pathname;
-  if (!user && pathname.match(/^\/(fr|en)?\/suivi/)) {
+  if (!user && pathname.match(/^\/(fr|en)?\/(suivi|compte|admin)/)) {
     const locale = pathname.startsWith("/en") ? "en" : "fr";
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/auth/login`;

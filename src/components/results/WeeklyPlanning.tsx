@@ -17,8 +17,9 @@ export function WeeklyPlanning({ training }: WeeklyPlanningProps) {
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("weekly_title")}</h3>
-      <div className="mt-4 grid grid-cols-7 gap-2">
+      <h3 className="font-display text-xl font-bold">{t("weekly_title")}</h3>
+      <div className="mt-4 overflow-x-auto -mx-2 px-2">
+        <div className="grid grid-cols-7 gap-2 min-w-[40rem]">
         {split.map(({ day, muscles, isRest }, i) => (
           <motion.div
             key={day}
@@ -29,7 +30,7 @@ export function WeeklyPlanning({ training }: WeeklyPlanningProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <span className="text-[10px] font-condensed font-semibold text-foreground/50 uppercase">
+            <span className="text-[10px] font-display font-semibold text-foreground/50 uppercase">
               {t(dayKeys[day])}
             </span>
             {isRest ? (
@@ -39,7 +40,7 @@ export function WeeklyPlanning({ training }: WeeklyPlanningProps) {
             ) : (
               <div className="flex flex-col items-center gap-0.5">
                 {muscles.map((mg) => (
-                  <span key={mg} className="text-[10px] font-semibold text-orange leading-tight">
+                  <span key={mg} className="text-[10px] font-semibold text-foreground leading-tight">
                     {t(`muscle_${mg}`)}
                   </span>
                 ))}
@@ -47,6 +48,7 @@ export function WeeklyPlanning({ training }: WeeklyPlanningProps) {
             )}
           </motion.div>
         ))}
+        </div>
       </div>
     </div>
   );

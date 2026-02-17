@@ -21,8 +21,8 @@ export function ProgressProtocol({ goal }: ProgressProtocolProps) {
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
       <div className="flex items-center gap-2">
-        <ClipboardList size={20} className="text-orange" />
-        <h3 className="font-condensed text-xl font-bold">{t("protocol_title")}</h3>
+        <ClipboardList size={20} className="text-foreground" />
+        <h3 className="font-display text-xl font-bold">{t("protocol_title")}</h3>
       </div>
       <p className="mt-1 text-sm text-foreground/50">{t(`protocol_${goal}_intro`)}</p>
       <div className="mt-4 space-y-3">
@@ -34,7 +34,7 @@ export function ProgressProtocol({ goal }: ProgressProtocolProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.08 }}
           >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange/20 text-xs font-bold text-orange">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs font-bold text-foreground">
               {i + 1}
             </span>
             <span className="text-sm">{step}</span>

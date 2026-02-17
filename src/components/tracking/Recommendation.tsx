@@ -25,7 +25,7 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
   if (last7.length < 3) {
     return (
       <div className="rounded-2xl border border-surface-light bg-surface p-6">
-        <h3 className="font-condensed text-xl font-bold">{t("reco_title")}</h3>
+        <h3 className="font-display text-xl font-bold">{t("reco_title")}</h3>
         <p className="mt-2 text-sm text-foreground/50">{t("reco_need_data")}</p>
       </div>
     );
@@ -53,7 +53,7 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
     const change = currentWeight - previousWeight;
     if (change > -0.2) {
       tips.push({
-        icon: <TrendingDown size={16} className="text-orange" />,
+        icon: <TrendingDown size={16} className="text-foreground" />,
         text: t("reco_cut_reduce"),
       });
     } else {
@@ -68,7 +68,7 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
     const change = currentWeight - previousWeight;
     if (change < 0.1) {
       tips.push({
-        icon: <TrendingUp size={16} className="text-orange" />,
+        icon: <TrendingUp size={16} className="text-foreground" />,
         text: t("reco_bulk_increase"),
       });
     } else {
@@ -81,7 +81,7 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
 
   if (currentSteps !== null && currentSteps < 10000) {
     tips.push({
-      icon: <TrendingUp size={16} className="text-orange" />,
+      icon: <TrendingUp size={16} className="text-foreground" />,
       text: t("reco_steps_low", { steps: Math.round(currentSteps) }),
     });
   } else if (currentSteps !== null) {
@@ -93,7 +93,7 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("reco_title")}</h3>
+      <h3 className="font-display text-xl font-bold">{t("reco_title")}</h3>
       <div className="mt-4 space-y-2">
         {tips.map((tip, i) => (
           <div key={i} className="flex items-center gap-3 rounded-xl bg-background/50 p-3">

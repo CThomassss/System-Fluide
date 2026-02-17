@@ -1,12 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ResultsDashboard } from "@/components/results/ResultsDashboard";
 import { computeAll } from "@/lib/calculations";
-import type { Sex, Goal, ActivityLevel, MuscleGroup, TrainingData, DayPlan } from "@/types/quiz";
-import { MUSCLE_GROUPS } from "@/lib/constants";
+import { parseTraining } from "@/lib/parseTraining";
+import { createClient } from "@/lib/supabase/client";
+import { savePendingQuiz } from "@/lib/pendingQuiz";
+import type { Sex, Goal, ActivityLevel } from "@/types/quiz";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { useTranslations } from "next-intl";
@@ -21,30 +24,10 @@ function isValidActivity(a: string | null): a is ActivityLevel {
   return ["sedentary", "light", "moderate", "active", "very_active"].includes(a ?? "");
 }
 
-function parseTraining(
-  dParam: string | null,
-  ssParam: string | null
-): TrainingData | null {
-  if (!dParam || !ssParam) return null;
-  const days: DayPlan[] = dParam.split("|").map((dayStr) => {
-    // Format: "dayIndex:muscle1.muscle2" e.g. "0:chest.back"
-    const [indexStr, musclesStr] = dayStr.split(":");
-    const dayIndex = Number(indexStr);
-    const muscles = (musclesStr ?? "").split(".").filter((m): m is MuscleGroup =>
-      (MUSCLE_GROUPS as readonly string[]).includes(m)
-    );
-    return { dayIndex: isNaN(dayIndex) ? 0 : dayIndex, muscles };
-  });
-  const sets = Number(ssParam);
-  if (days.length === 0 || days.some((d) => d.muscles.length === 0) || isNaN(sets) || sets <= 0) {
-    return null;
-  }
-  return { days, setsPerSession: sets };
-}
-
 export default function ResultsPage() {
   const searchParams = useSearchParams();
   const t = useTranslations("results");
+  const [isAuth, setIsAuth] = useState(false);
 
   const s = searchParams.get("s");
   const g = searchParams.get("g");
@@ -52,11 +35,10 @@ export default function ResultsPage() {
   const h = searchParams.get("h");
   const w = searchParams.get("w");
   const al = searchParams.get("al");
+  const dParam = searchParams.get("d");
+  const exParam = searchParams.get("ex");
 
-  const training = parseTraining(
-    searchParams.get("d"),
-    searchParams.get("ss")
-  );
+  const training = parseTraining(dParam, exParam);
 
   const valid =
     isValidSex(s) &&
@@ -67,7 +49,66 @@ export default function ResultsPage() {
     isValidActivity(al) &&
     training !== null;
 
-  if (!valid) {
+  const result = valid
+    ? computeAll(s as Sex, g as Goal, Number(a), Number(h), Number(w), al as ActivityLevel)
+    : null;
+
+  // Save quiz results: always to localStorage, and to DB if logged in
+  useEffect(() => {
+    if (!valid || !result) return;
+
+    const trainingData = dParam && exParam
+      ? JSON.stringify({ d: dParam, ex: exParam })
+      : null;
+
+    // Always save to localStorage (bridge for signup flow)
+    savePendingQuiz({
+      sex: s as string,
+      goal: g as string,
+      age: Number(a),
+      height: Number(h),
+      weight: Number(w),
+      activity_level: al as string,
+      training_data: trainingData,
+      bmr: result.bmr,
+      tdee: result.tdee,
+      target_calories: result.targetCalories,
+    });
+
+    // If logged in, also save directly to DB
+    const saveToDb = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      setIsAuth(true);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          sex: s,
+          height: Number(h),
+          weight: Number(w),
+          age: Number(a),
+          activity_level: al,
+          goal: g,
+          bmr: result.bmr,
+          tdee: result.tdee,
+          target_calories: result.targetCalories,
+          training_data: trainingData,
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        console.error("Failed to save quiz results to DB:", error);
+      }
+    };
+
+    saveToDb();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!valid || !result) {
     return (
       <>
         <Header />
@@ -83,20 +124,16 @@ export default function ResultsPage() {
     );
   }
 
-  const result = computeAll(
-    s as Sex,
-    g as Goal,
-    Number(a),
-    Number(h),
-    Number(w),
-    al as ActivityLevel
-  );
-
   return (
     <>
       <Header />
       <main>
-        <ResultsDashboard result={result} goal={g as Goal} training={training!} />
+        <ResultsDashboard
+          result={result}
+          goal={g as Goal}
+          training={training!}
+          context={isAuth ? "account" : "results"}
+        />
       </main>
       <Footer />
     </>

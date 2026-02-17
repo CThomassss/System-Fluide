@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { DailyEntryForm } from "@/components/tracking/DailyEntryForm";
 import { WeeklySummary } from "@/components/tracking/WeeklySummary";
 import { Recommendation } from "@/components/tracking/Recommendation";
+import { EntryCalendar } from "@/components/tracking/EntryCalendar";
 
 export default async function SuiviPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function SuiviPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("goal, target_calories, tdee, bmr")
+    .select("goal, target_calories")
     .eq("id", user.id)
     .single();
 
@@ -30,9 +31,13 @@ export default async function SuiviPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-xl px-4 py-8">
-        <DailyEntryForm />
-        <div className="mt-6 space-y-6">
+      <main className="mx-auto max-w-6xl px-6 pt-24 pb-12">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <DailyEntryForm />
+          <EntryCalendar entries={entries ?? []} />
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <WeeklySummary entries={entries ?? []} />
           <Recommendation
             goal={profile?.goal ?? null}

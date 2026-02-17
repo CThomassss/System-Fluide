@@ -18,7 +18,7 @@ export default function QuizPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-60px)]">
+      <main className="min-h-screen pt-24 pb-8">
         <QuizShell />
       </main>
     </>

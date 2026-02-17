@@ -23,7 +23,7 @@ export function StepActivity({ value, dispatch }: StepActivityProps) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-condensed text-2xl font-bold">
+        <h2 className="font-display text-2xl font-bold">
           {t("step_activity_title")}
         </h2>
         <p className="mt-1 text-sm text-foreground/60">

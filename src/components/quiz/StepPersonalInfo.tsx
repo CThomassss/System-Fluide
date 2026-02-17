@@ -35,7 +35,7 @@ export function StepPersonalInfo({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-condensed text-2xl font-bold">{t("step_info_title")}</h2>
+        <h2 className="font-display text-2xl font-bold">{t("step_info_title")}</h2>
         <p className="mt-1 text-sm text-foreground/60">{t("step_info_desc")}</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">

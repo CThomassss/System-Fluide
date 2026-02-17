@@ -45,12 +45,12 @@ export function DailyEntryForm() {
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h2 className="font-condensed text-xl font-bold">{t("daily_title")}</h2>
+      <h2 className="font-display text-xl font-bold">{t("daily_title")}</h2>
       <p className="mt-1 text-sm text-foreground/60">{t("daily_subtitle")}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         <div>
-          <label htmlFor="weight" className="block text-sm font-semibold font-condensed">{t("weight")}</label>
+          <label htmlFor="weight" className="block text-sm font-semibold font-display">{t("weight")}</label>
           <input
             id="weight"
             type="number"
@@ -58,29 +58,29 @@ export function DailyEntryForm() {
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             placeholder="75.0"
-            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
         <div>
-          <label htmlFor="steps" className="block text-sm font-semibold font-condensed">{t("steps")}</label>
+          <label htmlFor="steps" className="block text-sm font-semibold font-display">{t("steps")}</label>
           <input
             id="steps"
             type="number"
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
             placeholder="10000"
-            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
         <div>
-          <label htmlFor="calories" className="block text-sm font-semibold font-condensed">{t("calories")}</label>
+          <label htmlFor="calories" className="block text-sm font-semibold font-display">{t("calories")}</label>
           <input
             id="calories"
             type="number"
             value={calories}
             onChange={(e) => setCalories(e.target.value)}
             placeholder="2200"
-            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+            className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
       </div>

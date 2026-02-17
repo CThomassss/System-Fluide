@@ -25,10 +25,10 @@ export function NumberInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-condensed text-sm font-semibold text-foreground/70">
+      <label htmlFor={id} className="font-display text-sm font-semibold text-foreground/70">
         {label}
       </label>
-      <div className="flex items-center gap-2 rounded-xl border-2 border-surface-light bg-surface px-4 py-3 focus-within:border-orange transition-colors">
+      <div className="flex items-center gap-2 rounded-xl border-2 border-surface-light bg-surface px-4 py-3 focus-within:border-accent transition-colors">
         <input
           id={id}
           type="number"
@@ -54,7 +54,7 @@ export function NumberInput({
           max={max}
           className="w-full bg-transparent text-lg font-semibold outline-none text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <span className="text-sm text-foreground/50 font-condensed">{unit}</span>
+        <span className="text-sm text-foreground/50 font-display">{unit}</span>
       </div>
     </div>
   );

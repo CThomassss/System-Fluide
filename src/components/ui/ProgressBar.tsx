@@ -13,7 +13,7 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
   return (
     <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden" role="progressbar" aria-valuenow={current + 1} aria-valuemin={1} aria-valuemax={total}>
       <motion.div
-        className="h-full bg-orange rounded-full"
+        className="h-full bg-accent rounded-full"
         initial={{ width: 0 }}
         animate={{ width: `${pct}%` }}
         transition={{ duration: 0.4, ease: "easeOut" }}

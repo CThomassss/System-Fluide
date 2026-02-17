@@ -28,7 +28,7 @@ export interface DayPlan {
 
 export interface TrainingData {
   days: DayPlan[];
-  setsPerSession: number;
+  exercisesPerSession: number;
 }
 
 export interface QuizState {

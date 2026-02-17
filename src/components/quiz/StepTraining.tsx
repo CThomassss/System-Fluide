@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import type { MuscleGroup, QuizAction, TrainingData, DayPlan } from "@/types/quiz";
 import { MUSCLE_GROUPS } from "@/lib/constants";
 import { NumberInput } from "@/components/ui/NumberInput";
@@ -15,11 +15,6 @@ interface StepTrainingProps {
 
 const DAY_KEYS = ["day_mon", "day_tue", "day_wed", "day_thu", "day_fri", "day_sat", "day_sun"] as const;
 
-const subVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({ x: dir < 0 ? 60 : -60, opacity: 0 }),
-};
 
 export function StepTraining({ value, dispatch }: StepTrainingProps) {
   const t = useTranslations("quiz");
@@ -29,9 +24,8 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
   // Sub-step 1: pick weekdays
   // Sub-steps 2..N+1: muscles per selected day
   const [subStep, setSubStep] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [numSessions, setNumSessions] = useState(value?.days.length ?? 0);
-  const [sets, setSets] = useState(value?.setsPerSession ?? 0);
+  const [sets, setSets] = useState(value?.exercisesPerSession ?? 0);
   const [selectedDays, setSelectedDays] = useState<number[]>(
     value?.days.map((d) => d.dayIndex) ?? []
   );
@@ -54,7 +48,7 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
       const days: DayPlan[] = selectedDays
         .sort((a, b) => a - b)
         .map((di) => ({ dayIndex: di, muscles: dayMuscles[di] }));
-      dispatch({ type: "SET_TRAINING", payload: { days, setsPerSession: sets } });
+      dispatch({ type: "SET_TRAINING", payload: { days, exercisesPerSession: sets } });
     }
   }, [selectedDays, dayMuscles, sets, numSessions, dispatch]);
 
@@ -82,7 +76,6 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
   };
 
   const goSub = (next: number) => {
-    setDirection(next > subStep ? 1 : -1);
     setSubStep(next);
   };
 
@@ -102,7 +95,7 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-condensed text-2xl font-bold">
+        <h2 className="font-display text-2xl font-bold">
           {t("step_training_title")}
         </h2>
         <p className="mt-1 text-sm text-foreground/60">
@@ -122,9 +115,9 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
               key={i}
               className={`h-1.5 rounded-full transition-all ${
                 i === subStep
-                  ? "w-6 bg-orange"
+                  ? "w-6 bg-accent"
                   : i < subStep
-                    ? "w-1.5 bg-orange/40"
+                    ? "w-1.5 bg-accent/40"
                     : "w-1.5 bg-surface-light"
               }`}
             />
@@ -132,17 +125,7 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
         </div>
       )}
 
-      <div className="overflow-hidden">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={subStep}
-            custom={direction}
-            variants={subVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-          >
+      <div key={subStep} className="animate-fade-in">
             {subStep === 0 ? (
               /* --- Sub-step 0: sessions count + sets --- */
               <div className="grid gap-4 sm:grid-cols-2">
@@ -161,22 +144,22 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
                   max={7}
                 />
                 <NumberInput
-                  id="sets"
-                  label={t("sets_per_session")}
-                  unit={t("sets_unit")}
+                  id="exercises"
+                  label={t("exercises_per_session")}
+                  unit={t("exercises_unit")}
                   value={sets || null}
                   onChange={setSets}
                   min={1}
-                  max={40}
+                  max={20}
                 />
               </div>
             ) : subStep === 1 ? (
               /* --- Sub-step 1: pick weekdays --- */
               <div>
-                <h3 className="font-condensed text-lg font-semibold mb-3">
+                <h3 className="font-display text-lg font-semibold mb-3">
                   {t("training_pick_days_title")}
                 </h3>
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                   {DAY_KEYS.map((key, i) => {
                     const isSelected = selectedDays.includes(i);
                     const isFull = selectedDays.length >= numSessions && !isSelected;
@@ -186,9 +169,9 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
                         type="button"
                         onClick={() => toggleWeekday(i)}
                         disabled={isFull}
-                        className={`rounded-xl border-2 py-3 text-sm font-semibold font-condensed transition-colors ${
+                        className={`rounded-xl border-2 py-4 text-base font-semibold font-display transition-colors ${
                           isSelected
-                            ? "border-orange bg-orange/10 text-orange"
+                            ? "border-accent bg-accent/10 text-foreground"
                             : isFull
                               ? "border-surface-light bg-surface text-foreground/20 cursor-not-allowed"
                               : "border-surface-light bg-surface text-foreground/60 hover:border-surface-light/80"
@@ -214,10 +197,10 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
                 const dayName = tResults(DAY_KEYS[dayIndex]);
                 return (
                   <div>
-                    <h3 className="font-condensed text-lg font-semibold mb-3">
+                    <h3 className="font-display text-lg font-semibold mb-3">
                       {dayName}
                     </h3>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {MUSCLE_GROUPS.map((mg, i) => {
                         const isSelected = dayMuscles[dayIndex]?.includes(mg);
                         return (
@@ -225,9 +208,9 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
                             key={mg}
                             type="button"
                             onClick={() => toggleMuscle(dayIndex, mg)}
-                            className={`rounded-xl border-2 px-3 py-2 text-sm font-semibold font-condensed transition-colors ${
+                            className={`rounded-2xl border-2 px-4 py-4 text-base font-semibold font-display transition-colors ${
                               isSelected
-                                ? "border-orange bg-orange/10 text-orange"
+                                ? "border-accent bg-accent/10 text-foreground"
                                 : "border-surface-light bg-surface text-foreground/60 hover:border-surface-light/80"
                             }`}
                             initial={{ opacity: 0, y: 10 }}
@@ -244,8 +227,6 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
                 );
               })()
             )}
-          </motion.div>
-        </AnimatePresence>
       </div>
 
       {/* Sub-navigation arrows */}
@@ -255,7 +236,7 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
             <button
               type="button"
               onClick={() => goSub(subStep - 1)}
-              className="flex items-center gap-1 text-sm font-condensed font-semibold text-foreground/60 hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-sm font-display font-semibold text-foreground/60 hover:text-foreground transition-colors"
             >
               <ArrowLeft size={14} />
               {t("back")}
@@ -267,7 +248,7 @@ export function StepTraining({ value, dispatch }: StepTrainingProps) {
             <button
               type="button"
               onClick={() => goSub(subStep + 1)}
-              className="flex items-center gap-1 text-sm font-condensed font-semibold text-orange hover:text-orange/80 transition-colors"
+              className="flex items-center gap-1 text-sm font-display font-semibold text-foreground hover:text-foreground/80 transition-colors"
             >
               {subStep === 0
                 ? t("next")

@@ -20,7 +20,7 @@ export function TriangleDiagram({ pillars, tdee }: TriangleDiagramProps) {
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
-      <h3 className="font-condensed text-xl font-bold">{t("pillars_title")}</h3>
+      <h3 className="font-display text-xl font-bold">{t("pillars_title")}</h3>
       <div className="mt-6 space-y-3">
         {pillarConfig.map(({ key, color }, i) => {
           const pct = Math.round((pillars[key] / tdee) * 100);
@@ -32,7 +32,7 @@ export function TriangleDiagram({ pillars, tdee }: TriangleDiagramProps) {
               transition={{ delay: i * 0.1 }}
             >
               <div className="flex items-center justify-between text-sm">
-                <span className="font-condensed font-semibold">
+                <span className="font-display font-semibold">
                   {t(`pillar_${key}`)}
                 </span>
                 <span className="text-foreground/60">

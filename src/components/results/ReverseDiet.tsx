@@ -29,7 +29,7 @@ export function ReverseDiet({ goal, tdee }: ReverseDietProps) {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between p-6 text-left"
       >
-        <h3 className="font-condensed text-xl font-bold">{t(buttonKey)}</h3>
+        <h3 className="font-display text-xl font-bold">{t(buttonKey)}</h3>
         <motion.div
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -54,15 +54,15 @@ export function ReverseDiet({ goal, tdee }: ReverseDietProps) {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-3 rounded-xl bg-background/50 p-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange/20 text-xs font-bold text-orange">1</span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs font-bold text-foreground">1</span>
                   <span className="text-sm">{t("reverse_step_1", { amount: Math.abs(direction) })}</span>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl bg-background/50 p-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange/20 text-xs font-bold text-orange">2</span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs font-bold text-foreground">2</span>
                   <span className="text-sm">{t("reverse_step_2")}</span>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl bg-background/50 p-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange/20 text-xs font-bold text-orange">3</span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs font-bold text-foreground">3</span>
                   <span className="text-sm">{t("reverse_step_3", { tdee })}</span>
                 </div>
               </div>
@@ -71,7 +71,7 @@ export function ReverseDiet({ goal, tdee }: ReverseDietProps) {
                 <p className="text-sm font-semibold text-green">{t("reverse_benefits")}</p>
               </div>
 
-              <p className="text-center text-sm font-semibold text-orange">
+              <p className="text-center text-sm font-semibold text-foreground">
                 {t("reverse_motivation")}
               </p>
             </div>
