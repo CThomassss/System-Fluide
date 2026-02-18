@@ -4,8 +4,8 @@ import {
   CALORIES_PER_GRAM,
   BASE_MEALS,
   DEFAULT_DAILY_STEPS,
-  STEP_LENGTH_KM,
-  KCAL_PER_KM_PER_KG,
+  STEP_LENGTH_FACTOR,
+  WALKING_COEFFICIENT,
   TRAINING_MET,
   SESSION_DURATION_H,
 } from "./constants";
@@ -29,11 +29,14 @@ export function calculateBMR(
 
 /**
  * NEAT from daily steps only (no exercise).
- * 1 km walking ≈ 0.5 kcal × body weight (kg)
+ * Step length = height(cm) × 0.415
+ * Distance (km) = steps × step_length(m) / 1000
+ * Calories = weight(kg) × distance(km) × 0.75
  */
-export function calculateNEAT(dailySteps: number, weight: number): number {
-  const km = dailySteps * STEP_LENGTH_KM;
-  return Math.round(km * KCAL_PER_KM_PER_KG * weight);
+export function calculateNEAT(dailySteps: number, weight: number, height: number): number {
+  const stepLengthM = height * STEP_LENGTH_FACTOR / 100; // cm → m
+  const distanceKm = (dailySteps * stepLengthM) / 1000;
+  return Math.round(weight * distanceKm * WALKING_COEFFICIENT);
 }
 
 /**
@@ -54,11 +57,12 @@ export function calculateTDEE(
   bmr: number,
   activityLevel: ActivityLevel,
   weight: number,
+  height: number,
   sessionsPerWeek: number,
   dailySteps?: number
 ): number {
   const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
-  const neat = calculateNEAT(steps, weight);
+  const neat = calculateNEAT(steps, weight, height);
   const eat = calculateEAT(sessionsPerWeek, weight);
   return Math.round((bmr + neat + eat) / 0.9);
 }
@@ -74,11 +78,12 @@ export function calculatePillars(
   bmr: number,
   activityLevel: ActivityLevel,
   weight: number,
+  height: number,
   sessionsPerWeek: number,
   dailySteps?: number
 ) {
   const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
-  const neat = calculateNEAT(steps, weight);
+  const neat = calculateNEAT(steps, weight, height);
   const eat = calculateEAT(sessionsPerWeek, weight);
   const tdee = Math.round((bmr + neat + eat) / 0.9);
   const tef = tdee - bmr - neat - eat; // remainder = ~10% of TDEE
@@ -153,9 +158,9 @@ export function computeAll(
 ): CalculationResult {
   const sessions = sessionsPerWeek ?? 0;
   const bmr = calculateBMR(sex, weight, height, age);
-  const tdee = calculateTDEE(bmr, activityLevel, weight, sessions, dailySteps);
+  const tdee = calculateTDEE(bmr, activityLevel, weight, height, sessions, dailySteps);
   const targetCalories = calculateTargetCalories(tdee, goal);
-  const pillars = calculatePillars(bmr, activityLevel, weight, sessions, dailySteps);
+  const pillars = calculatePillars(bmr, activityLevel, weight, height, sessions, dailySteps);
   const { macros, macroGrams } = calculateMacros(targetCalories, weight, goal);
 
   return { bmr, tdee, targetCalories, pillars, macros, macroGrams };

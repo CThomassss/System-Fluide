@@ -17,15 +17,15 @@ export const DEFAULT_DAILY_STEPS: Record<ActivityLevel, number> = {
   very_active: 15000,  // > 12,500
 };
 
-// 1 step ≈ 0.75m = 0.00075 km
-export const STEP_LENGTH_KM = 0.00075;
+// Step length = height(cm) × 0.415 (standard anthropometric formula)
+export const STEP_LENGTH_FACTOR = 0.415;
 
-// Walking burns ~0.5 kcal per km per kg body weight
-export const KCAL_PER_KM_PER_KG = 0.5;
+// Walking coefficient: 0.75 kcal per kg per km (moderate walking pace)
+export const WALKING_COEFFICIENT = 0.75;
 
-// Intense weight training: MET ≈ 6, session duration ≈ 1.5h
+// Intense weight training: MET ≈ 6, session duration ≈ 1h
 export const TRAINING_MET = 6;
-export const SESSION_DURATION_H = 1.5;
+export const SESSION_DURATION_H = 1;
 
 export const GOAL_ADJUSTMENTS: Record<Goal, number> = {
   bulk: 100,
