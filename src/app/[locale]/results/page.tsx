@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -27,7 +27,6 @@ function isValidActivity(a: string | null): a is ActivityLevel {
 export default function ResultsPage() {
   const searchParams = useSearchParams();
   const t = useTranslations("results");
-  const [isAuth, setIsAuth] = useState(false);
 
   const s = searchParams.get("s");
   const g = searchParams.get("g");
@@ -84,8 +83,6 @@ export default function ResultsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      setIsAuth(true);
-
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -135,7 +132,7 @@ export default function ResultsPage() {
           result={result}
           goal={g as Goal}
           training={training!}
-          context={isAuth ? "account" : "results"}
+          context="results"
         />
       </main>
       <Footer />
