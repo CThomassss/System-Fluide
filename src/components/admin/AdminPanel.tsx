@@ -124,6 +124,8 @@ function UserDetail({ user }: { user: UserProfile }) {
   const canCompute =
     user.sex && user.goal && user.age && user.height && user.weight && user.activity_level;
 
+  const training = parseTrainingFromDB(user.training_data);
+
   const result = canCompute
     ? computeAll(
         user.sex as Sex,
@@ -131,11 +133,11 @@ function UserDetail({ user }: { user: UserProfile }) {
         user.age!,
         user.height!,
         user.weight!,
-        user.activity_level as ActivityLevel
+        user.activity_level as ActivityLevel,
+        undefined,
+        training?.days.length
       )
     : null;
-
-  const training = parseTrainingFromDB(user.training_data);
 
   const customMeals = user.custom_meals ? JSON.parse(user.custom_meals) : null;
   const computedMeals = user.target_calories ? scaleMeals(user.target_calories) : null;

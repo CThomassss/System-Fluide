@@ -8,6 +8,24 @@ export const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
   very_active: 1.9,
 };
 
+// Default daily steps per activity level (midpoint of each range)
+export const DEFAULT_DAILY_STEPS: Record<ActivityLevel, number> = {
+  sedentary: 3500,     // < 5,000
+  light: 6250,         // 5,000 - 7,500
+  moderate: 8750,      // 7,500 - 10,000
+  active: 11250,       // 10,000 - 12,500
+  very_active: 15000,  // > 12,500
+};
+
+// 1 step ≈ 0.75m = 0.00075 km
+export const STEP_LENGTH_KM = 0.00075;
+
+// Walking burns ~0.5 kcal per km per kg body weight
+export const KCAL_PER_KM_PER_KG = 0.5;
+
+// Intense weight training session burns ~400 kcal
+export const KCAL_PER_SESSION = 400;
+
 export const GOAL_ADJUSTMENTS: Record<Goal, number> = {
   bulk: 100,
   cut: -100,

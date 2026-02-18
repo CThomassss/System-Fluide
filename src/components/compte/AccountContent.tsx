@@ -70,7 +70,9 @@ export function AccountContent({ profile }: AccountContentProps) {
     profile.age!,
     profile.height!,
     profile.weight!,
-    profile.activity_level as ActivityLevel
+    profile.activity_level as ActivityLevel,
+    undefined,
+    training.days.length
   );
 
   const sexLabel = profile.sex === "male" ? tQuiz("sex_male") : tQuiz("sex_female");

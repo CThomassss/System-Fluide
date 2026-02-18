@@ -53,7 +53,9 @@ export function TrackingDashboard({ profile }: TrackingDashboardProps) {
     profile.age!,
     profile.height!,
     profile.weight!,
-    profile.activity_level as ActivityLevel
+    profile.activity_level as ActivityLevel,
+    undefined,
+    training?.days.length
   );
 
   return (

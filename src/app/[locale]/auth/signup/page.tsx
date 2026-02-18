@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/Button";
 import { getPendingQuiz, savePendingQuiz } from "@/lib/pendingQuiz";
 import { computeAll } from "@/lib/calculations";
+import { parseTraining } from "@/lib/parseTraining";
 import type { Sex, Goal, ActivityLevel } from "@/types/quiz";
 
 export default function SignupPage() {
@@ -67,17 +68,20 @@ export default function SignupPage() {
         });
       } else if (hasQuizData) {
         // Fallback: no localStorage but URL has quiz params
+        const trainingData = quizDays && quizExercises
+          ? JSON.stringify({ d: quizDays, ex: quizExercises })
+          : null;
+        const parsedTraining = parseTraining(quizDays, quizExercises);
         const result = computeAll(
           quizSex as Sex,
           quizGoal as Goal,
           Number(quizAge),
           Number(quizHeight),
           Number(quizWeight),
-          quizActivity as ActivityLevel
+          quizActivity as ActivityLevel,
+          undefined,
+          parsedTraining?.days.length
         );
-        const trainingData = quizDays && quizExercises
-          ? JSON.stringify({ d: quizDays, ex: quizExercises })
-          : null;
         savePendingQuiz({
           sex: quizSex as string,
           goal: (goal || quizGoal) as string,

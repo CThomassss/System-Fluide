@@ -52,7 +52,7 @@ export default function ResultsPage() {
   const dailySteps = stepsParam && !isNaN(Number(stepsParam)) ? Number(stepsParam) : undefined;
 
   const result = valid
-    ? computeAll(s as Sex, g as Goal, Number(a), Number(h), Number(w), al as ActivityLevel, dailySteps)
+    ? computeAll(s as Sex, g as Goal, Number(a), Number(h), Number(w), al as ActivityLevel, dailySteps, training?.days.length)
     : null;
 
   // Save quiz results: always to localStorage, and to DB if logged in

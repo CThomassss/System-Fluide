@@ -1,13 +1,16 @@
 import type { Sex, Goal, ActivityLevel, CalculationResult, DayPlan } from "@/types/quiz";
 import {
-  ACTIVITY_MULTIPLIERS,
   GOAL_ADJUSTMENTS,
   CALORIES_PER_GRAM,
   BASE_MEALS,
+  DEFAULT_DAILY_STEPS,
+  STEP_LENGTH_KM,
+  KCAL_PER_KM_PER_KG,
+  KCAL_PER_SESSION,
 } from "./constants";
 
 /**
- * Harris-Benedict BMR formula
+ * Harris-Benedict BMR formula (revised, Roza & Shizgal 1984)
  * Men:   88.362 + 13.397 * weight(kg) + 4.799 * height(cm) - 5.677 * age
  * Women: 447.593 + 9.247 * weight(kg) + 3.098 * height(cm) - 4.330 * age
  */
@@ -23,26 +26,59 @@ export function calculateBMR(
   return Math.round(447.593 + 9.247 * weight + 3.098 * height - 4.330 * age);
 }
 
-export function calculateTDEE(bmr: number, activityLevel: ActivityLevel, dailySteps?: number): number {
-  if (activityLevel === "very_active" && dailySteps && dailySteps > 12500) {
-    // More precise multiplier based on actual step count
-    // Base: 1.9 at 12,500 steps, +0.04 per 1,000 additional steps, capped at 2.5
-    const multiplier = Math.min(2.5, 1.9 + (dailySteps - 12500) / 25000);
-    return Math.round(bmr * multiplier);
-  }
-  return Math.round(bmr * ACTIVITY_MULTIPLIERS[activityLevel]);
+/**
+ * NEAT from daily steps only (no exercise).
+ * 1 km walking ≈ 0.5 kcal × body weight (kg)
+ */
+export function calculateNEAT(dailySteps: number, weight: number): number {
+  const km = dailySteps * STEP_LENGTH_KM;
+  return Math.round(km * KCAL_PER_KM_PER_KG * weight);
+}
+
+/**
+ * EAT from training sessions (~400 kcal per intense session).
+ * Returns daily average.
+ */
+export function calculateEAT(sessionsPerWeek: number): number {
+  return Math.round((KCAL_PER_SESSION * sessionsPerWeek) / 7);
+}
+
+/**
+ * TDEE built from components: BMR + NEAT + EAT + TEF.
+ * TEF = 10% of TDEE → TDEE = (BMR + NEAT + EAT) / 0.9
+ */
+export function calculateTDEE(
+  bmr: number,
+  activityLevel: ActivityLevel,
+  weight: number,
+  sessionsPerWeek: number,
+  dailySteps?: number
+): number {
+  const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
+  const neat = calculateNEAT(steps, weight);
+  const eat = calculateEAT(sessionsPerWeek);
+  return Math.round((bmr + neat + eat) / 0.9);
 }
 
 export function calculateTargetCalories(tdee: number, goal: Goal): number {
   return tdee + GOAL_ADJUSTMENTS[goal];
 }
 
-export function calculatePillars(tdee: number, bmr: number) {
-  // Use real BMR; TEF ≈ 10% of intake; split remainder into NEAT/EAT (2:1)
-  const tef = Math.round(tdee * 0.10);
-  const remaining = tdee - bmr - tef;
-  const neat = Math.round(remaining * 0.67);
-  const eat = remaining - neat; // remainder to avoid rounding issues
+/**
+ * Decompose TDEE into its 4 pillars using real component values.
+ */
+export function calculatePillars(
+  bmr: number,
+  activityLevel: ActivityLevel,
+  weight: number,
+  sessionsPerWeek: number,
+  dailySteps?: number
+) {
+  const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
+  const neat = calculateNEAT(steps, weight);
+  const eat = calculateEAT(sessionsPerWeek);
+  const tdee = Math.round((bmr + neat + eat) / 0.9);
+  const tef = tdee - bmr - neat - eat; // remainder = ~10% of TDEE
   return { bmr, neat, eat, tef };
 }
 
@@ -109,12 +145,14 @@ export function computeAll(
   height: number,
   weight: number,
   activityLevel: ActivityLevel,
-  dailySteps?: number
+  dailySteps?: number,
+  sessionsPerWeek?: number
 ): CalculationResult {
+  const sessions = sessionsPerWeek ?? 0;
   const bmr = calculateBMR(sex, weight, height, age);
-  const tdee = calculateTDEE(bmr, activityLevel, dailySteps);
+  const tdee = calculateTDEE(bmr, activityLevel, weight, sessions, dailySteps);
   const targetCalories = calculateTargetCalories(tdee, goal);
-  const pillars = calculatePillars(tdee, bmr);
+  const pillars = calculatePillars(bmr, activityLevel, weight, sessions, dailySteps);
   const { macros, macroGrams } = calculateMacros(targetCalories, weight, goal);
 
   return { bmr, tdee, targetCalories, pillars, macros, macroGrams };
