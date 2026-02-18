@@ -57,7 +57,7 @@ export function DailyEntryForm() {
             step="0.1"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            placeholder="75.0"
+            placeholder="..."
             className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
@@ -68,7 +68,7 @@ export function DailyEntryForm() {
             type="number"
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
-            placeholder="10000"
+            placeholder="..."
             className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
@@ -79,7 +79,7 @@ export function DailyEntryForm() {
             type="number"
             value={calories}
             onChange={(e) => setCalories(e.target.value)}
-            placeholder="2200"
+            placeholder="..."
             className="mt-1 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
