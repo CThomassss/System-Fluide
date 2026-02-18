@@ -37,7 +37,7 @@ export function ResultsDashboard({ result, goal, training, context = "results" }
   const isEmbedded = context !== "results";
 
   return (
-    <div className={isEmbedded ? "" : "mx-auto max-w-6xl px-6 pt-32 pb-12"}>
+    <div className={isEmbedded ? "" : "mx-auto max-w-5xl px-6 pt-32 pb-12"}>
       <div className="text-center">
         <h1 className="font-display text-3xl font-bold sm:text-4xl">
           {t("title")}
