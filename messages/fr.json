@@ -155,7 +155,7 @@
     "exercises_title": "Analyse de ton entrainement",
     "volume_weekly": "{sets} exercices/semaine au total",
     "volume_per_muscle": "~{sets} exercices/muscle/semaine",
-    "volume_low": "Volume faible : vise 10-20 exercices par muscle par semaine pour une croissance optimale.",
+    "volume_low": "Pour les muscles en retard, on vise une moyenne minimale de 18 séries par semaine.",
     "volume_optimal": "Volume optimal : ton volume d'entrainement est dans la fourchette ideale.",
     "volume_high": "Volume eleve : attention au surentrainement. Reduis si la recuperation est insuffisante.",
     "muscle_chest": "Pectoraux",
