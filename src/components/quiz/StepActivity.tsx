@@ -1,11 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import type { ActivityLevel, QuizAction } from "@/types/quiz";
 import { RadioCard } from "@/components/ui/RadioCard";
 
 interface StepActivityProps {
   value: ActivityLevel | null;
+  dailySteps: number | null;
   dispatch: React.Dispatch<QuizAction>;
 }
 
@@ -17,7 +19,7 @@ const levels: ActivityLevel[] = [
   "very_active",
 ];
 
-export function StepActivity({ value, dispatch }: StepActivityProps) {
+export function StepActivity({ value, dailySteps, dispatch }: StepActivityProps) {
   const t = useTranslations("quiz");
 
   return (
@@ -43,6 +45,33 @@ export function StepActivity({ value, dispatch }: StepActivityProps) {
           />
         ))}
       </div>
+
+      {value === "very_active" && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="rounded-2xl border border-surface-light bg-surface p-4"
+        >
+          <label htmlFor="daily-steps" className="block font-display text-sm font-semibold">
+            {t("daily_steps_label")}
+          </label>
+          <p className="mt-1 text-xs text-foreground/50">{t("daily_steps_desc")}</p>
+          <input
+            id="daily-steps"
+            type="number"
+            min={12000}
+            max={50000}
+            step={500}
+            placeholder={t("daily_steps_placeholder")}
+            value={dailySteps ?? ""}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v)) dispatch({ type: "SET_DAILY_STEPS", payload: v });
+            }}
+            className="mt-2 w-full rounded-xl border border-surface-light bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+          />
+        </motion.div>
+      )}
     </div>
   );
 }

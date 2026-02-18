@@ -33,7 +33,11 @@ export function QuizShell() {
           state.weight > 0
         );
       case 3:
-        return state.activityLevel !== null;
+        if (state.activityLevel === null) return false;
+        if (state.activityLevel === "very_active") {
+          return state.dailySteps !== null && state.dailySteps >= 12000;
+        }
+        return true;
       case 4:
         return (
           state.training !== null &&
@@ -62,6 +66,7 @@ export function QuizShell() {
         al: state.activityLevel!,
         d: dParam,
         ex: String(state.training!.exercisesPerSession),
+        ...(state.dailySteps ? { steps: String(state.dailySteps) } : {}),
       });
       router.push(`/results?${params.toString()}`);
     } else {
@@ -79,7 +84,7 @@ export function QuizShell() {
       weight={state.weight}
       dispatch={dispatch}
     />,
-    <StepActivity key="activity" value={state.activityLevel} dispatch={dispatch} />,
+    <StepActivity key="activity" value={state.activityLevel} dailySteps={state.dailySteps} dispatch={dispatch} />,
     <StepTraining key="training" value={state.training} dispatch={dispatch} />,
   ];
 

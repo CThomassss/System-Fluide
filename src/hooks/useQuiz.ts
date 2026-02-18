@@ -11,6 +11,7 @@ const initialState: QuizState = {
   height: null,
   weight: null,
   activityLevel: null,
+  dailySteps: null,
   training: null,
 };
 
@@ -28,7 +29,13 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
         weight: action.payload.weight,
       };
     case "SET_ACTIVITY":
-      return { ...state, activityLevel: action.payload };
+      return {
+        ...state,
+        activityLevel: action.payload,
+        dailySteps: action.payload === "very_active" ? state.dailySteps : null,
+      };
+    case "SET_DAILY_STEPS":
+      return { ...state, dailySteps: action.payload };
     case "SET_TRAINING":
       return { ...state, training: action.payload };
     case "NEXT_STEP":

@@ -37,6 +37,7 @@ export default function ResultsPage() {
   const al = searchParams.get("al");
   const dParam = searchParams.get("d");
   const exParam = searchParams.get("ex");
+  const stepsParam = searchParams.get("steps");
 
   const training = parseTraining(dParam, exParam);
 
@@ -49,8 +50,10 @@ export default function ResultsPage() {
     isValidActivity(al) &&
     training !== null;
 
+  const dailySteps = stepsParam && !isNaN(Number(stepsParam)) ? Number(stepsParam) : undefined;
+
   const result = valid
-    ? computeAll(s as Sex, g as Goal, Number(a), Number(h), Number(w), al as ActivityLevel)
+    ? computeAll(s as Sex, g as Goal, Number(a), Number(h), Number(w), al as ActivityLevel, dailySteps)
     : null;
 
   // Save quiz results: always to localStorage, and to DB if logged in

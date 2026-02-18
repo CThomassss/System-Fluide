@@ -39,6 +39,7 @@ export interface QuizState {
   height: number | null;
   weight: number | null;
   activityLevel: ActivityLevel | null;
+  dailySteps: number | null;
   training: TrainingData | null;
 }
 
@@ -47,6 +48,7 @@ export type QuizAction =
   | { type: "SET_GOAL"; payload: Goal }
   | { type: "SET_PERSONAL_INFO"; payload: { age: number; height: number; weight: number } }
   | { type: "SET_ACTIVITY"; payload: ActivityLevel }
+  | { type: "SET_DAILY_STEPS"; payload: number }
   | { type: "SET_TRAINING"; payload: TrainingData }
   | { type: "NEXT_STEP" }
   | { type: "PREV_STEP" }

@@ -23,7 +23,13 @@ export function calculateBMR(
   return Math.round(447.593 + 9.247 * weight + 3.098 * height - 4.330 * age);
 }
 
-export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number {
+export function calculateTDEE(bmr: number, activityLevel: ActivityLevel, dailySteps?: number): number {
+  if (activityLevel === "very_active" && dailySteps && dailySteps > 12500) {
+    // More precise multiplier based on actual step count
+    // Base: 1.9 at 12,500 steps, +0.04 per 1,000 additional steps, capped at 2.5
+    const multiplier = Math.min(2.5, 1.9 + (dailySteps - 12500) / 25000);
+    return Math.round(bmr * multiplier);
+  }
   return Math.round(bmr * ACTIVITY_MULTIPLIERS[activityLevel]);
 }
 
@@ -102,10 +108,11 @@ export function computeAll(
   age: number,
   height: number,
   weight: number,
-  activityLevel: ActivityLevel
+  activityLevel: ActivityLevel,
+  dailySteps?: number
 ): CalculationResult {
   const bmr = calculateBMR(sex, weight, height, age);
-  const tdee = calculateTDEE(bmr, activityLevel);
+  const tdee = calculateTDEE(bmr, activityLevel, dailySteps);
   const targetCalories = calculateTargetCalories(tdee, goal);
   const pillars = calculatePillars(tdee, bmr);
   const { macros, macroGrams } = calculateMacros(targetCalories, weight, goal);
