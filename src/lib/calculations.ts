@@ -2,7 +2,6 @@ import type { Sex, Goal, ActivityLevel, CalculationResult, DayPlan } from "@/typ
 import {
   ACTIVITY_MULTIPLIERS,
   GOAL_ADJUSTMENTS,
-  MACRO_RATIOS,
   CALORIES_PER_GRAM,
   BASE_MEALS,
 } from "./constants";
@@ -43,29 +42,24 @@ export function calculatePillars(tdee: number, bmr: number) {
 
 export function calculateMacros(
   targetCalories: number,
-  weight: number,
-  goal: Goal
+  _weight: number,
+  _goal: Goal
 ) {
-  const proteinGrams = Math.round(weight * MACRO_RATIOS.protein[goal]);
-  const fatGrams = Math.round(weight * MACRO_RATIOS.fat[goal]);
-
-  const proteinCalories = proteinGrams * CALORIES_PER_GRAM.protein;
-  const fatCalories = fatGrams * CALORIES_PER_GRAM.fat;
-  const carbCalories = Math.max(0, targetCalories - proteinCalories - fatCalories);
-  const carbGrams = Math.round(carbCalories / CALORIES_PER_GRAM.carbs);
-
-  const total = proteinCalories + fatCalories + carbCalories;
+  // Fixed macro split: 25% protein, 50% carbs, 25% fat
+  const proteinCalories = targetCalories * 0.25;
+  const carbCalories = targetCalories * 0.50;
+  const fatCalories = targetCalories * 0.25;
 
   return {
     macros: {
-      protein: Math.round((proteinCalories / total) * 100),
-      fat: Math.round((fatCalories / total) * 100),
-      carbs: 100 - Math.round((proteinCalories / total) * 100) - Math.round((fatCalories / total) * 100),
+      protein: 25,
+      fat: 25,
+      carbs: 50,
     },
     macroGrams: {
-      protein: proteinGrams,
-      fat: fatGrams,
-      carbs: carbGrams,
+      protein: Math.round(proteinCalories / CALORIES_PER_GRAM.protein),
+      fat: Math.round(fatCalories / CALORIES_PER_GRAM.fat),
+      carbs: Math.round(carbCalories / CALORIES_PER_GRAM.carbs),
     },
   };
 }

@@ -32,6 +32,7 @@ export default async function SuiviPage() {
     <>
       <Header />
       <main className="mx-auto max-w-6xl px-6 pt-24 pb-12">
+        <h1 className="font-display text-3xl font-bold mb-6">Suivi quotidien</h1>
         <div className="grid gap-6 lg:grid-cols-2">
           <DailyEntryForm />
           <EntryCalendar entries={entries ?? []} />

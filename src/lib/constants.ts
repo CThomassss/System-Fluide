@@ -87,7 +87,7 @@ export const BASE_MEALS: BaseMeal[] = [
   {
     slot: "dinner",
     items: [
-      { key: "salmon", grams: 150 },
+      { key: "red_meat", grams: 150 },
       { key: "sweet_potato", grams: 200 },
       { key: "green_salad", grams: 100 },
     ],

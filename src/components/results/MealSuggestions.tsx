@@ -61,6 +61,24 @@ export function MealSuggestions({ targetCalories, macroGrams }: MealSuggestionsP
           </motion.div>
         ))}
       </div>
+
+      <div className="mt-6 rounded-xl bg-background/50 p-4">
+        <h4 className="font-display font-semibold text-sm mb-3">{t("equivalents_title")}</h4>
+        <div className="space-y-2 text-sm">
+          <div>
+            <span className="font-semibold text-accent">{t("protein")}</span>
+            <span className="text-foreground/60"> : {t("equiv_protein")}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-green">{t("carbs")}</span>
+            <span className="text-foreground/60"> : {t("equiv_carbs")}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-blue-400">{t("fat")}</span>
+            <span className="text-foreground/60"> : {t("equiv_fat")}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

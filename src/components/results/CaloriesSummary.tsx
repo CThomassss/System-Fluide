@@ -14,13 +14,13 @@ interface CaloriesSummaryProps {
 export function CaloriesSummary({ bmr, tdee, target, goal }: CaloriesSummaryProps) {
   const t = useTranslations("results");
 
-  const goalLabel = goal === "bulk" ? t("surplus") : goal === "cut" ? t("deficit") : t("maintenance");
-
   const rows = [
     { label: t("bmr_label"), value: bmr, color: "text-foreground" },
     { label: t("tdee_label"), value: tdee, color: "text-foreground" },
-    { label: `${t("target_label")} (${goalLabel})`, value: target, color: "text-green" },
+    { label: t("target_label"), value: target, color: "text-green" },
   ];
+
+  const targetNote = goal === "cut" ? t("target_note_cut") : goal === "bulk" ? t("target_note_bulk") : t("target_note_recomp");
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
@@ -41,6 +41,7 @@ export function CaloriesSummary({ bmr, tdee, target, goal }: CaloriesSummaryProp
           </motion.div>
         ))}
       </div>
+      <p className="mt-4 text-sm text-accent-muted leading-relaxed">{targetNote}</p>
     </div>
   );
 }

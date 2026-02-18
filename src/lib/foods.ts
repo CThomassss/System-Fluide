@@ -9,7 +9,7 @@ export const FOOD_ITEMS = [
   "whey_shake",
   "milk",
   "raspberries",
-  "salmon",
+  "red_meat",
   "sweet_potato",
   "green_salad",
 ] as const;

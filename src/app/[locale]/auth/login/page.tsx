@@ -30,7 +30,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/suivi");
+    router.push("/compte");
     router.refresh();
   };
 
