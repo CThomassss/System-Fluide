@@ -6,7 +6,8 @@ import {
   DEFAULT_DAILY_STEPS,
   STEP_LENGTH_KM,
   KCAL_PER_KM_PER_KG,
-  KCAL_PER_SESSION,
+  TRAINING_MET,
+  SESSION_DURATION_H,
 } from "./constants";
 
 /**
@@ -36,11 +37,13 @@ export function calculateNEAT(dailySteps: number, weight: number): number {
 }
 
 /**
- * EAT from training sessions (~400 kcal per intense session).
+ * EAT from training sessions: MET × weight × duration per session.
+ * MET 6 = intense weight training, 1.5h per session.
  * Returns daily average.
  */
-export function calculateEAT(sessionsPerWeek: number): number {
-  return Math.round((KCAL_PER_SESSION * sessionsPerWeek) / 7);
+export function calculateEAT(sessionsPerWeek: number, weight: number): number {
+  const kcalPerSession = TRAINING_MET * weight * SESSION_DURATION_H;
+  return Math.round((kcalPerSession * sessionsPerWeek) / 7);
 }
 
 /**
@@ -56,7 +59,7 @@ export function calculateTDEE(
 ): number {
   const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
   const neat = calculateNEAT(steps, weight);
-  const eat = calculateEAT(sessionsPerWeek);
+  const eat = calculateEAT(sessionsPerWeek, weight);
   return Math.round((bmr + neat + eat) / 0.9);
 }
 
@@ -76,7 +79,7 @@ export function calculatePillars(
 ) {
   const steps = dailySteps ?? DEFAULT_DAILY_STEPS[activityLevel];
   const neat = calculateNEAT(steps, weight);
-  const eat = calculateEAT(sessionsPerWeek);
+  const eat = calculateEAT(sessionsPerWeek, weight);
   const tdee = Math.round((bmr + neat + eat) / 0.9);
   const tef = tdee - bmr - neat - eat; // remainder = ~10% of TDEE
   return { bmr, neat, eat, tef };

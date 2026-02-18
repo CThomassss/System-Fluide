@@ -23,8 +23,9 @@ export const STEP_LENGTH_KM = 0.00075;
 // Walking burns ~0.5 kcal per km per kg body weight
 export const KCAL_PER_KM_PER_KG = 0.5;
 
-// Intense weight training session burns ~400 kcal
-export const KCAL_PER_SESSION = 400;
+// Intense weight training: MET ≈ 6, session duration ≈ 1.5h
+export const TRAINING_MET = 6;
+export const SESSION_DURATION_H = 1.5;
 
 export const GOAL_ADJUSTMENTS: Record<Goal, number> = {
   bulk: 100,
