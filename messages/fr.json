@@ -56,7 +56,7 @@
     "step_goal_title": "Quel est ton objectif ?",
     "step_goal_desc": "Choisis la direction de ta transformation.",
     "goal_bulk": "Prise de masse",
-    "goal_bulk_desc": "Surplus progressif de +100 kcal pour construire du muscle",
+    "goal_bulk_desc": "Surplus progressif de +200 kcal pour construire du muscle",
     "goal_cut": "Seche",
     "goal_cut_desc": "Deficit progressif de -100 kcal pour perdre du gras",
     "goal_recomp": "Recomposition",
@@ -113,7 +113,7 @@
     "tdee_label": "Depense totale (TDEE)",
     "target_label": "Ton objectif",
     "target_note_cut": "Commence avec un deficit de -100 kcal pour debuter ta seche et suis le protocole progressivement.",
-    "target_note_bulk": "Commence avec un surplus de +100 kcal pour construire du muscle et ajuste progressivement.",
+    "target_note_bulk": "Commence avec un surplus de +200 kcal pour construire du muscle et ajuste progressivement.",
     "target_note_recomp": "Maintiens tes calories au niveau de ta depense totale pour recomposer ton physique.",
     "surplus": "surplus",
     "deficit": "deficit",
@@ -218,7 +218,13 @@
     "go_tracking": "Acceder au suivi",
     "share": "Partager mes resultats",
     "restart": "Refaire le quiz",
-    "copied": "Lien copie !"
+    "copied": "Lien copie !",
+    "projection_title": "Projection sur 12 semaines",
+    "projection_subtitle": "Estimation de l'evolution de ton poids selon ton objectif calorique.",
+    "projection_weeks": "Semaines",
+    "projection_week": "Semaine",
+    "projection_weight": "Poids",
+    "saving": "Enregistrement en cours..."
   },
   "auth": {
     "login_title": "Connexion",
@@ -272,7 +278,17 @@
     "reco_bulk_good": "Bonne progression ! Le gain est dans la fourchette ideale.",
     "reco_steps_low": "Moyenne de {steps} pas/jour. Vise 10 000 pour optimiser ton NEAT.",
     "reco_steps_good": "Excellent ! {steps} pas/jour en moyenne, ton NEAT est eleve.",
-    "reco_keep_tracking": "Continue a enregistrer tes donnees pour des recommandations plus precises."
+    "reco_keep_tracking": "Continue a enregistrer tes donnees pour des recommandations plus precises.",
+    "food_log_title": "Journal alimentaire",
+    "food_log_select": "Choisir un aliment...",
+    "food_log_add": "Ajouter",
+    "food_log_total": "Total du jour",
+    "adjust_title": "Ajustement calorique",
+    "adjust_suggestion": "{reason}",
+    "adjust_apply": "Appliquer l'ajustement",
+    "adjust_applied": "Ajustement applique !",
+    "adjust_bulk_no_gain": "Pas de prise de poids detectee. Suggestion : passer a {calories} kcal (+100).",
+    "adjust_cut_no_loss": "Pas de perte de poids detectee. Suggestion : passer a {calories} kcal (-100)."
   },
   "compte": {
     "title": "Mon compte",
@@ -316,7 +332,16 @@
     "training_saved": "Enregistre !",
     "exercises_per_session": "Exercices par seance",
     "training_days": "Jours d'entrainement",
-    "click_day_hint": "Clique sur un jour pour l'activer ou le desactiver."
+    "click_day_hint": "Clique sur un jour pour l'activer ou le desactiver.",
+    "target_override": "Objectif kcal",
+    "save_target": "Enregistrer",
+    "computed_target": "Calcule : {value} kcal",
+    "custom_foods_title": "Aliments personnalises",
+    "food_name_placeholder": "Nom de l'aliment",
+    "protein_short": "Prot /100g",
+    "carbs_short": "Gluc /100g",
+    "fat_short": "Lip /100g",
+    "add_custom_food": "Ajouter"
   },
   "footer": {
     "copyright": "CEOLIN Coaching"

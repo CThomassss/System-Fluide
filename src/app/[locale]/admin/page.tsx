@@ -26,18 +26,23 @@ export default async function AdminPage() {
   // Admin can read all profiles via RLS policy
   const { data: users, error: usersError } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, sex, height, weight, age, activity_level, goal, bmr, tdee, target_calories, training_data, custom_meals, role, created_at")
+    .select("id, first_name, last_name, sex, height, weight, age, activity_level, goal, bmr, tdee, target_calories, target_calories_override, training_data, custom_meals, role, created_at")
     .order("created_at", { ascending: false });
 
   if (usersError) {
     console.error("Admin: failed to fetch users:", usersError);
   }
 
+  const { data: customFoods } = await supabase
+    .from("custom_foods")
+    .select("id, name, protein_per_100g, carbs_per_100g, fat_per_100g, calories_per_100g")
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <Header />
       <main className="mx-auto max-w-6xl px-6 pt-24 pb-12">
-        <AdminPanel users={users ?? []} />
+        <AdminPanel users={users ?? []} customFoods={customFoods ?? []} />
       </main>
       <Footer />
     </>

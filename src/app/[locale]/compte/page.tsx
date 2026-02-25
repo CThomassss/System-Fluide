@@ -22,11 +22,15 @@ export default async function ComptePage() {
     console.error("Compte: failed to fetch profile:", profileError);
   }
 
+  const { data: customFoods } = await supabase
+    .from("custom_foods")
+    .select("id, protein_per_100g, carbs_per_100g, fat_per_100g, calories_per_100g");
+
   return (
     <>
       <Header />
       <main>
-        <AccountContent profile={profile} />
+        <AccountContent profile={profile} customFoods={customFoods ?? []} />
       </main>
       <Footer />
     </>

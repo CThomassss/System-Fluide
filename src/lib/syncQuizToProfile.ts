@@ -14,6 +14,15 @@ export async function syncQuizToProfile(): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
+  // Check if admin has overridden target calories
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("target_calories_override")
+    .eq("id", user.id)
+    .single();
+
+  const isOverride = currentProfile?.target_calories_override === true;
+
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -25,7 +34,7 @@ export async function syncQuizToProfile(): Promise<boolean> {
       goal: pending.goal,
       bmr: pending.bmr,
       tdee: pending.tdee,
-      target_calories: pending.target_calories,
+      ...(isOverride ? {} : { target_calories: pending.target_calories }),
       training_data: pending.training_data,
       ...(pending.first_name ? { first_name: pending.first_name } : {}),
       ...(pending.last_name ? { last_name: pending.last_name } : {}),

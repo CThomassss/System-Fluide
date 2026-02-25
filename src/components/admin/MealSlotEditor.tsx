@@ -2,21 +2,24 @@
 
 import { useTranslations } from "next-intl";
 import { X, Plus } from "lucide-react";
-import { FOOD_ITEMS, type FoodKey } from "@/lib/foods";
+import { FOOD_ITEMS } from "@/lib/foods";
 import type { BaseMealItem } from "@/lib/constants";
+import type { CustomFood } from "./CustomFoodEditor";
 
 interface MealSlotEditorProps {
   slot: string;
   items: BaseMealItem[];
+  customFoods?: CustomFood[];
   onChange: (items: BaseMealItem[]) => void;
 }
 
-export function MealSlotEditor({ slot, items, onChange }: MealSlotEditorProps) {
+export function MealSlotEditor({ slot, items, customFoods, onChange }: MealSlotEditorProps) {
   const t = useTranslations("results");
   const ta = useTranslations("admin");
 
   const usedKeys = new Set(items.map((i) => i.key));
-  const availableFoods = FOOD_ITEMS.filter((f) => !usedKeys.has(f));
+  const availableStandard = FOOD_ITEMS.filter((f) => !usedKeys.has(f));
+  const availableCustom = (customFoods ?? []).filter((f) => !usedKeys.has(`custom_${f.id}`));
 
   const updateGrams = (index: number, grams: number) => {
     const next = [...items];
@@ -28,9 +31,9 @@ export function MealSlotEditor({ slot, items, onChange }: MealSlotEditorProps) {
     onChange(items.filter((_, i) => i !== index));
   };
 
-  const addItem = (key: string) => {
+  const addItem = (key: string, label?: string) => {
     if (!key) return;
-    onChange([...items, { key, grams: 100 }]);
+    onChange([...items, { key, grams: 100, ...(label ? { label } : {}) }]);
   };
 
   return (
@@ -42,7 +45,7 @@ export function MealSlotEditor({ slot, items, onChange }: MealSlotEditorProps) {
         {items.map((item, i) => (
           <div key={item.key} className="flex items-center gap-2">
             <span className="text-sm text-foreground/70 flex-1 truncate">
-              {t(`food_${item.key}` as Parameters<typeof t>[0])}
+              {item.label ?? t(`food_${item.key}` as Parameters<typeof t>[0])}
             </span>
             <input
               type="number"
@@ -62,12 +65,18 @@ export function MealSlotEditor({ slot, items, onChange }: MealSlotEditorProps) {
           </div>
         ))}
       </div>
-      {availableFoods.length > 0 && (
+      {(availableStandard.length > 0 || availableCustom.length > 0) && (
         <div className="mt-3 flex items-center gap-2">
           <Plus size={14} className="text-foreground/40" />
           <select
             onChange={(e) => {
-              addItem(e.target.value);
+              const val = e.target.value;
+              if (val.startsWith("custom_")) {
+                const cf = (customFoods ?? []).find((f) => `custom_${f.id}` === val);
+                addItem(val, cf?.name);
+              } else {
+                addItem(val);
+              }
               e.target.value = "";
             }}
             defaultValue=""
@@ -76,9 +85,14 @@ export function MealSlotEditor({ slot, items, onChange }: MealSlotEditorProps) {
             <option value="" disabled>
               {ta("select_food")}
             </option>
-            {availableFoods.map((food) => (
+            {availableStandard.map((food) => (
               <option key={food} value={food}>
                 {t(`food_${food}` as Parameters<typeof t>[0])}
+              </option>
+            ))}
+            {availableCustom.map((food) => (
+              <option key={food.id} value={`custom_${food.id}`}>
+                {food.name}
               </option>
             ))}
           </select>

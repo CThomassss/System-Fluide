@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { MealSlotEditor } from "./MealSlotEditor";
 import { Save, UtensilsCrossed } from "lucide-react";
 import type { BaseMeal } from "@/lib/constants";
+import type { CustomFood } from "./CustomFoodEditor";
 
 const SLOTS = ["breakfast", "lunch", "preworkout", "dinner"] as const;
 
@@ -14,9 +15,10 @@ interface MealPlanEditorProps {
   userId: string;
   initialMeals: BaseMeal[] | null;
   computedMeals: BaseMeal[] | null;
+  customFoods?: CustomFood[];
 }
 
-export function MealPlanEditor({ userId, initialMeals, computedMeals }: MealPlanEditorProps) {
+export function MealPlanEditor({ userId, initialMeals, computedMeals, customFoods }: MealPlanEditorProps) {
   const t = useTranslations("admin");
   const baseMeals = initialMeals ?? computedMeals ?? SLOTS.map((s) => ({ slot: s, items: [] }));
 
@@ -78,6 +80,7 @@ export function MealPlanEditor({ userId, initialMeals, computedMeals }: MealPlan
             key={meal.slot}
             slot={meal.slot}
             items={meal.items}
+            customFoods={customFoods}
             onChange={(items) => updateSlot(i, items)}
           />
         ))}

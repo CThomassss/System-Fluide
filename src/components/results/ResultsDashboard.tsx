@@ -13,7 +13,9 @@ import { WeeklyPlanning } from "./WeeklyPlanning";
 import { ProgressProtocol } from "./ProgressProtocol";
 import { ReverseDiet } from "./ReverseDiet";
 import { TrackingCTA } from "./TrackingCTA";
+import { ProjectionChart } from "./ProjectionChart";
 import type { CalculationResult, Goal, TrainingData } from "@/types/quiz";
+import type { BaseMeal } from "@/lib/constants";
 import { Share2, RotateCcw, Check } from "lucide-react";
 
 interface ResultsDashboardProps {
@@ -22,9 +24,14 @@ interface ResultsDashboardProps {
   training: TrainingData;
   /** Controls which footer actions appear. Default: "results" */
   context?: "results" | "account" | "tracking";
+  customMeals?: BaseMeal[] | null;
+  customFoods?: { id: string; protein_per_100g: number; carbs_per_100g: number; fat_per_100g: number; calories_per_100g: number }[];
+  weight?: number;
+  /** When true, navigation buttons are disabled (DB save in progress) */
+  saving?: boolean;
 }
 
-export function ResultsDashboard({ result, goal, training, context = "results" }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, goal, training, context = "results", customMeals, customFoods, weight, saving }: ResultsDashboardProps) {
   const t = useTranslations("results");
   const [copied, setCopied] = useState(false);
 
@@ -63,7 +70,7 @@ export function ResultsDashboard({ result, goal, training, context = "results" }
 
       {/* Nutrition + Training — 2 col */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <MealSuggestions targetCalories={result.targetCalories} macroGrams={result.macroGrams} />
+        <MealSuggestions targetCalories={result.targetCalories} macroGrams={result.macroGrams} customMeals={customMeals} customFoods={customFoods} />
         <ExerciseRecommendations training={training} goal={goal} />
       </div>
 
@@ -78,6 +85,18 @@ export function ResultsDashboard({ result, goal, training, context = "results" }
         <ReverseDiet goal={goal} tdee={result.tdee} />
       </div>
 
+      {/* Projection chart — account only */}
+      {context === "account" && weight && (
+        <div className="mt-6">
+          <ProjectionChart
+            currentWeight={weight}
+            targetCalories={result.targetCalories}
+            tdee={result.tdee}
+            goal={goal}
+          />
+        </div>
+      )}
+
       {/* Context-dependent footer */}
       {context === "results" && (
         <>
@@ -85,12 +104,12 @@ export function ResultsDashboard({ result, goal, training, context = "results" }
             <TrackingCTA />
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button variant="secondary" onClick={handleShare}>
+            <Button variant="secondary" onClick={handleShare} disabled={saving}>
               {copied ? <Check size={16} /> : <Share2 size={16} />}
               {copied ? t("copied") : t("share")}
             </Button>
-            <Link href="/quiz">
-              <Button variant="ghost">
+            <Link href="/quiz" aria-disabled={saving} className={saving ? "pointer-events-none opacity-50" : ""}>
+              <Button variant="ghost" disabled={saving}>
                 <RotateCcw size={16} />
                 {t("restart")}
               </Button>

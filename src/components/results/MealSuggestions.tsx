@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { UtensilsCrossed } from "lucide-react";
 import { scaleMeals } from "@/lib/calculations";
+import { computeMealMacros } from "@/lib/foods";
+import type { BaseMeal } from "@/lib/constants";
 
 interface MacroGrams {
   protein: number;
@@ -11,14 +13,32 @@ interface MacroGrams {
   carbs: number;
 }
 
+interface CustomFoodData {
+  id: string;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  calories_per_100g: number;
+}
+
 interface MealSuggestionsProps {
   targetCalories: number;
   macroGrams?: MacroGrams;
+  customMeals?: BaseMeal[] | null;
+  customFoods?: CustomFoodData[];
 }
 
-export function MealSuggestions({ targetCalories, macroGrams }: MealSuggestionsProps) {
+export function MealSuggestions({ targetCalories, macroGrams, customMeals, customFoods }: MealSuggestionsProps) {
   const t = useTranslations("results");
-  const meals = scaleMeals(targetCalories);
+  const meals: BaseMeal[] = customMeals ?? scaleMeals(targetCalories);
+
+  // Compute real macros from meal items when custom meals + custom foods are available
+  const realMacros = customMeals && customFoods
+    ? computeMealMacros(customMeals, customFoods)
+    : null;
+  const displayMacros = realMacros
+    ? { protein: realMacros.protein, carbs: realMacros.carbs, fat: realMacros.fat }
+    : macroGrams;
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
@@ -27,11 +47,11 @@ export function MealSuggestions({ targetCalories, macroGrams }: MealSuggestionsP
         {t("meals_scaled_for", { calories: targetCalories })}
       </p>
 
-      {macroGrams && (
+      {displayMacros && (
         <div className="mt-3 flex flex-wrap gap-3">
-          <MacroPill label={t("protein")} grams={macroGrams.protein} color="bg-accent/20 text-accent" />
-          <MacroPill label={t("carbs")} grams={macroGrams.carbs} color="bg-green/20 text-green" />
-          <MacroPill label={t("fat")} grams={macroGrams.fat} color="bg-blue-400/20 text-blue-400" />
+          <MacroPill label={t("protein")} grams={displayMacros.protein} color="bg-accent/20 text-accent" />
+          <MacroPill label={t("carbs")} grams={displayMacros.carbs} color="bg-green/20 text-green" />
+          <MacroPill label={t("fat")} grams={displayMacros.fat} color="bg-blue-400/20 text-blue-400" />
         </div>
       )}
 
@@ -51,12 +71,15 @@ export function MealSuggestions({ targetCalories, macroGrams }: MealSuggestionsP
               </span>
             </div>
             <div className="space-y-1 pl-6">
-              {items.map(({ key, grams }) => (
-                <div key={key} className="flex items-center justify-between text-sm">
-                  <span className="text-foreground/70">{t(`food_${key}`)}</span>
-                  <span className="font-semibold text-foreground/90">{grams}g</span>
-                </div>
-              ))}
+              {items.map((item) => {
+                const label = item.label ?? t(`food_${item.key}` as Parameters<typeof t>[0]);
+                return (
+                  <div key={item.key} className="flex items-center justify-between text-sm">
+                    <span className="text-foreground/70">{label}</span>
+                    <span className="font-semibold text-foreground/90">{item.grams}g</span>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         ))}

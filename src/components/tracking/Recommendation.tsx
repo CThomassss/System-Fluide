@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { TrendingDown, TrendingUp, Target } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
+import { computeCalorieAdjustment } from "@/lib/autoAdjust";
+import { getCurrentWeekBounds, getPreviousWeekBounds } from "@/lib/weekUtils";
+import { TrendingDown, TrendingUp, Target, Zap } from "lucide-react";
 
 interface Entry {
   date: string;
@@ -13,14 +19,20 @@ interface Entry {
 interface RecommendationProps {
   goal: string | null;
   targetCalories?: number | null;
+  bmr?: number | null;
   entries: Entry[];
 }
 
-export function Recommendation({ goal, entries }: RecommendationProps) {
+export function Recommendation({ goal, targetCalories, bmr, entries }: RecommendationProps) {
   const t = useTranslations("tracking");
+  const router = useRouter();
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
 
-  const last7 = entries.slice(0, 7);
-  const prev7 = entries.slice(7, 14);
+  const { mondayStr, sundayStr } = getCurrentWeekBounds();
+  const { mondayStr: prevMondayStr, sundayStr: prevSundayStr } = getPreviousWeekBounds();
+  const last7 = entries.filter((e) => e.date >= mondayStr && e.date <= sundayStr);
+  const prev7 = entries.filter((e) => e.date >= prevMondayStr && e.date <= prevSundayStr);
 
   if (last7.length < 3) {
     return (
@@ -91,6 +103,28 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
     });
   }
 
+  // Auto-adjustment suggestion
+  const adjustment =
+    goal && targetCalories && bmr
+      ? computeCalorieAdjustment(goal, targetCalories, bmr, entries)
+      : null;
+
+  const handleApplyAdjustment = async () => {
+    if (!adjustment) return;
+    setApplying(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ target_calories: adjustment.newTargetCalories })
+        .eq("id", user.id);
+      setApplied(true);
+      setTimeout(() => router.refresh(), 500);
+    }
+    setApplying(false);
+  };
+
   return (
     <div className="rounded-2xl border border-surface-light bg-surface p-6">
       <h3 className="font-display text-xl font-bold">{t("reco_title")}</h3>
@@ -105,6 +139,29 @@ export function Recommendation({ goal, entries }: RecommendationProps) {
           <p className="text-sm text-foreground/50">{t("reco_keep_tracking")}</p>
         )}
       </div>
+
+      {/* Auto-adjustment suggestion */}
+      {adjustment && !applied && (
+        <div className="mt-4 rounded-xl border border-accent/30 bg-accent/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap size={16} className="text-accent" />
+            <h4 className="font-display font-semibold text-sm">{t("adjust_title")}</h4>
+          </div>
+          <p className="text-sm text-foreground/70">
+            {t(`${adjustment.reason}` as Parameters<typeof t>[0], { calories: adjustment.newTargetCalories })}
+          </p>
+          <div className="mt-3">
+            <Button onClick={handleApplyAdjustment} disabled={applying} className="px-3 py-1.5 text-xs">
+              {t("adjust_apply")}
+            </Button>
+          </div>
+        </div>
+      )}
+      {applied && (
+        <div className="mt-4 rounded-xl bg-green/10 p-3 text-center">
+          <p className="text-sm font-semibold text-green">{t("adjust_applied")}</p>
+        </div>
+      )}
     </div>
   );
 }

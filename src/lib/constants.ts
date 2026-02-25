@@ -28,7 +28,7 @@ export const TRAINING_MET = 6;
 export const SESSION_DURATION_H = 1;
 
 export const GOAL_ADJUSTMENTS: Record<Goal, number> = {
-  bulk: 100,
+  bulk: 200,
   cut: -100,
   recomp: 0,
 };
@@ -70,6 +70,7 @@ export const MUSCLE_GROUPS: MuscleGroup[] = [
 export interface BaseMealItem {
   key: string;
   grams: number;
+  label?: string;
 }
 
 export interface BaseMeal {

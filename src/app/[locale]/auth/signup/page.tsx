@@ -44,7 +44,38 @@ export default function SignupPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+
+    // Build quiz data to encode in the confirmation email callback URL
+    const pending = getPendingQuiz();
+    const quizPayload = pending
+      ? { ...pending, first_name: firstName, last_name: lastName,
+          ...(height ? { height: parseFloat(height) } : {}),
+          ...(weight ? { weight: parseFloat(weight) } : {}),
+          ...(age ? { age: parseInt(age, 10) } : {}),
+          ...(goal ? { goal } : {}),
+        }
+      : hasQuizData
+        ? {
+            sex: quizSex as string,
+            goal: (goal || quizGoal) as string,
+            age: age ? parseInt(age, 10) : Number(quizAge),
+            height: height ? parseFloat(height) : Number(quizHeight),
+            weight: weight ? parseFloat(weight) : Number(quizWeight),
+            activity_level: quizActivity as string,
+            training_data: quizDays && quizExercises ? JSON.stringify({ d: quizDays, ex: quizExercises }) : null,
+            first_name: firstName,
+            last_name: lastName,
+          }
+        : null;
+
+    const quizParam = quizPayload ? `?quiz=${btoa(JSON.stringify(quizPayload))}` : "";
+    const redirectUrl = `${window.location.origin}/auth/callback${quizParam}`;
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: redirectUrl },
+    });
 
     if (signUpError) {
       setError(t("signup_error"));
@@ -52,51 +83,37 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.user) {
-      // Save quiz data + name to localStorage for sync after email confirmation
-      const pending = getPendingQuiz();
-      if (pending) {
-        // Quiz data already in localStorage from results page — add name + form edits
-        savePendingQuiz({
-          ...pending,
-          first_name: firstName,
-          last_name: lastName,
-          ...(height ? { height: parseFloat(height) } : {}),
-          ...(weight ? { weight: parseFloat(weight) } : {}),
-          ...(age ? { age: parseInt(age, 10) } : {}),
-          ...(goal ? { goal } : {}),
-        });
-      } else if (hasQuizData) {
-        // Fallback: no localStorage but URL has quiz params
-        const trainingData = quizDays && quizExercises
-          ? JSON.stringify({ d: quizDays, ex: quizExercises })
-          : null;
-        const parsedTraining = parseTraining(quizDays, quizExercises);
-        const result = computeAll(
-          quizSex as Sex,
-          quizGoal as Goal,
-          Number(quizAge),
-          Number(quizHeight),
-          Number(quizWeight),
-          quizActivity as ActivityLevel,
-          undefined,
-          parsedTraining?.days.length
-        );
-        savePendingQuiz({
-          sex: quizSex as string,
-          goal: (goal || quizGoal) as string,
-          age: age ? parseInt(age, 10) : Number(quizAge),
-          height: height ? parseFloat(height) : Number(quizHeight),
-          weight: weight ? parseFloat(weight) : Number(quizWeight),
-          activity_level: quizActivity as string,
-          training_data: trainingData,
-          bmr: result.bmr,
-          tdee: result.tdee,
-          target_calories: result.targetCalories,
-          first_name: firstName,
-          last_name: lastName,
-        });
-      }
+    if (data.user && quizPayload) {
+      // Keep localStorage as fallback for same-browser confirmation
+      const trainingData = quizPayload.training_data ?? null;
+      const parsedTraining = parseTraining(
+        quizDays ?? (trainingData ? JSON.parse(trainingData).d : null),
+        quizExercises ?? (trainingData ? JSON.parse(trainingData).ex : null)
+      );
+      const result = computeAll(
+        (quizPayload.sex) as Sex,
+        (quizPayload.goal) as Goal,
+        quizPayload.age as number,
+        quizPayload.height as number,
+        quizPayload.weight as number,
+        (quizPayload.activity_level) as ActivityLevel,
+        undefined,
+        parsedTraining?.days.length
+      );
+      savePendingQuiz({
+        sex: quizPayload.sex as string,
+        goal: quizPayload.goal as string,
+        age: quizPayload.age as number,
+        height: quizPayload.height as number,
+        weight: quizPayload.weight as number,
+        activity_level: quizPayload.activity_level as string,
+        training_data: trainingData,
+        bmr: result.bmr,
+        tdee: result.tdee,
+        target_calories: result.targetCalories,
+        first_name: firstName,
+        last_name: lastName,
+      });
     }
 
     setSuccess(true);

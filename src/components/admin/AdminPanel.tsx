@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { computeAll, scaleMeals } from "@/lib/calculations";
+import { computeAll, scaleMeals, calculateMacros } from "@/lib/calculations";
 import { parseTrainingFromDB } from "@/lib/parseTraining";
 import { CaloriesSummary } from "@/components/results/CaloriesSummary";
 import { MacroSplit } from "@/components/results/MacroSplit";
@@ -11,7 +11,10 @@ import { ExerciseRecommendations } from "@/components/results/ExerciseRecommenda
 import { WeeklyPlanning } from "@/components/results/WeeklyPlanning";
 import { MealPlanEditor } from "./MealPlanEditor";
 import { TrainingEditor } from "./TrainingEditor";
-import { ChevronDown, ChevronUp, Users } from "lucide-react";
+import { CustomFoodEditor, type CustomFood } from "./CustomFoodEditor";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
+import { ChevronDown, ChevronUp, Users, Save } from "lucide-react";
 import type { Sex, Goal, ActivityLevel } from "@/types/quiz";
 
 interface UserProfile {
@@ -27,6 +30,7 @@ interface UserProfile {
   bmr: number | null;
   tdee: number | null;
   target_calories: number | null;
+  target_calories_override: boolean | null;
   training_data: string | null;
   custom_meals: string | null;
   role: string | null;
@@ -35,9 +39,10 @@ interface UserProfile {
 
 interface AdminPanelProps {
   users: UserProfile[];
+  customFoods: CustomFood[];
 }
 
-export function AdminPanel({ users }: AdminPanelProps) {
+export function AdminPanel({ users, customFoods }: AdminPanelProps) {
   const t = useTranslations("admin");
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
@@ -55,11 +60,16 @@ export function AdminPanel({ users }: AdminPanelProps) {
         <span>{t("user_count", { count: nonAdminUsers.length })}</span>
       </div>
 
+      <div className="mt-8">
+        <CustomFoodEditor initialFoods={customFoods} />
+      </div>
+
       <div className="mt-8 space-y-4">
         {nonAdminUsers.map((user) => (
           <UserRow
             key={user.id}
             user={user}
+            customFoods={customFoods}
             isExpanded={expandedUser === user.id}
             onToggle={() => setExpandedUser(expandedUser === user.id ? null : user.id)}
           />
@@ -74,10 +84,12 @@ export function AdminPanel({ users }: AdminPanelProps) {
 
 function UserRow({
   user,
+  customFoods,
   isExpanded,
   onToggle,
 }: {
   user: UserProfile;
+  customFoods: CustomFood[];
   isExpanded: boolean;
   onToggle: () => void;
 }) {
@@ -112,12 +124,12 @@ function UserRow({
         </div>
       </button>
 
-      {isExpanded && <UserDetail user={user} />}
+      {isExpanded && <UserDetail user={user} customFoods={customFoods} />}
     </div>
   );
 }
 
-function UserDetail({ user }: { user: UserProfile }) {
+function UserDetail({ user, customFoods }: { user: UserProfile; customFoods: CustomFood[] }) {
   const t = useTranslations("admin");
 
   // Recompute results from profile data
@@ -139,8 +151,41 @@ function UserDetail({ user }: { user: UserProfile }) {
       )
     : null;
 
+  // Target override state
+  const [customTarget, setCustomTarget] = useState<number>(
+    user.target_calories ?? result?.targetCalories ?? 0
+  );
+  const [savingTarget, setSavingTarget] = useState(false);
+  const [savedTarget, setSavedTarget] = useState(false);
+
+  const isOverride = user.target_calories_override === true;
+  const effectiveTarget = isOverride && user.target_calories
+    ? user.target_calories
+    : result?.targetCalories ?? 0;
+
+  const effectiveMacros = result
+    ? (effectiveTarget !== result.targetCalories
+        ? calculateMacros(effectiveTarget, user.weight!, user.goal as Goal)
+        : { macros: result.macros, macroGrams: result.macroGrams })
+    : null;
+
+  const handleSaveTarget = async () => {
+    setSavingTarget(true);
+    setSavedTarget(false);
+    const supabase = createClient();
+    await supabase
+      .from("profiles")
+      .update({ target_calories: customTarget, target_calories_override: true })
+      .eq("id", user.id);
+    user.target_calories = customTarget;
+    user.target_calories_override = true;
+    setSavingTarget(false);
+    setSavedTarget(true);
+    setTimeout(() => setSavedTarget(false), 2000);
+  };
+
   const customMeals = user.custom_meals ? JSON.parse(user.custom_meals) : null;
-  const computedMeals = user.target_calories ? scaleMeals(user.target_calories) : null;
+  const computedMeals = effectiveTarget ? scaleMeals(effectiveTarget) : null;
 
   return (
     <div className="border-t border-surface-light px-6 pb-6">
@@ -152,23 +197,49 @@ function UserDetail({ user }: { user: UserProfile }) {
         <Stat label={t("user_weight")} value={user.weight ? `${user.weight} kg` : "—"} />
       </div>
 
-      {/* Full results dashboard */}
+      {/* Target calories override */}
       {result && (
+        <div className="mt-4 rounded-xl border border-surface-light bg-background/50 p-4">
+          <h4 className="font-display font-semibold text-sm mb-2">{t("target_override")}</h4>
+          <p className="text-xs text-foreground/50 mb-3">
+            {t("computed_target", { value: result.targetCalories })}
+          </p>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              value={customTarget}
+              onChange={(e) => setCustomTarget(Number(e.target.value))}
+              className="w-28 rounded-lg border border-surface-light bg-background px-3 py-1.5 text-sm outline-none focus:border-accent"
+            />
+            <span className="text-sm text-foreground/50">kcal</span>
+            <Button onClick={handleSaveTarget} disabled={savingTarget} className="px-3 py-1.5 text-xs">
+              <Save size={14} />
+              {t("save_target")}
+            </Button>
+            {savedTarget && (
+              <span className="text-xs font-semibold text-green">{t("saved")}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Full results dashboard */}
+      {result && effectiveMacros && (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <CaloriesSummary
             bmr={result.bmr}
             tdee={result.tdee}
-            target={result.targetCalories}
+            target={effectiveTarget}
             goal={user.goal as Goal}
           />
-          <MacroSplit macros={result.macros} macroGrams={result.macroGrams} />
+          <MacroSplit macros={effectiveMacros.macros} macroGrams={effectiveMacros.macroGrams} />
         </div>
       )}
 
       {/* Meals + Training */}
-      {result && training && (
+      {result && effectiveMacros && training && (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <MealSuggestions targetCalories={result.targetCalories} macroGrams={result.macroGrams} />
+          <MealSuggestions targetCalories={effectiveTarget} macroGrams={effectiveMacros.macroGrams} customFoods={customFoods} />
           <ExerciseRecommendations training={training} goal={user.goal as Goal} />
         </div>
       )}
@@ -186,6 +257,7 @@ function UserDetail({ user }: { user: UserProfile }) {
           userId={user.id}
           initialMeals={customMeals}
           computedMeals={computedMeals}
+          customFoods={customFoods}
         />
       </div>
 

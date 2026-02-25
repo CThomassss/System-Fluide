@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Scale, Footprints, Flame } from "lucide-react";
+import { getCurrentWeekBounds } from "@/lib/weekUtils";
 
 interface Entry {
   date: string;
@@ -17,7 +18,8 @@ interface WeeklySummaryProps {
 export function WeeklySummary({ entries }: WeeklySummaryProps) {
   const t = useTranslations("tracking");
 
-  const last7 = entries.slice(0, 7);
+  const { mondayStr, sundayStr } = getCurrentWeekBounds();
+  const last7 = entries.filter((e) => e.date >= mondayStr && e.date <= sundayStr);
 
   const avg = (values: (number | null)[]) => {
     const valid = values.filter((v): v is number => v !== null);

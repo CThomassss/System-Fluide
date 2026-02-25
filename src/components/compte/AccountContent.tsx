@@ -6,10 +6,11 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { ResultsDashboard } from "@/components/results/ResultsDashboard";
-import { computeAll } from "@/lib/calculations";
+import { computeAll, calculateMacros } from "@/lib/calculations";
 import { parseTrainingFromDB } from "@/lib/parseTraining";
 import { syncQuizToProfile } from "@/lib/syncQuizToProfile";
 import type { Sex, Goal, ActivityLevel } from "@/types/quiz";
+import type { BaseMeal } from "@/lib/constants";
 
 interface Profile {
   first_name: string | null;
@@ -21,13 +22,25 @@ interface Profile {
   activity_level: string | null;
   goal: string | null;
   training_data: string | null;
+  custom_meals: string | null;
+  target_calories: number | null;
+  target_calories_override: boolean | null;
+}
+
+interface CustomFoodData {
+  id: string;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  calories_per_100g: number;
 }
 
 interface AccountContentProps {
   profile: Profile | null;
+  customFoods?: CustomFoodData[];
 }
 
-export function AccountContent({ profile }: AccountContentProps) {
+export function AccountContent({ profile, customFoods }: AccountContentProps) {
   const t = useTranslations("compte");
   const tQuiz = useTranslations("quiz");
   const router = useRouter();
@@ -49,6 +62,9 @@ export function AccountContent({ profile }: AccountContentProps) {
     profile?.activity_level;
 
   const training = parseTrainingFromDB(profile?.training_data ?? null);
+  const customMeals: BaseMeal[] | null = profile?.custom_meals
+    ? JSON.parse(profile.custom_meals)
+    : null;
 
   if (!canCompute || !training) {
     return (
@@ -74,6 +90,14 @@ export function AccountContent({ profile }: AccountContentProps) {
     undefined,
     training.days.length
   );
+
+  // If admin has overridden target calories, use the DB value
+  if (profile.target_calories_override && profile.target_calories) {
+    result.targetCalories = profile.target_calories;
+    const overriddenMacros = calculateMacros(profile.target_calories, profile.weight!, profile.goal as Goal);
+    result.macros = overriddenMacros.macros;
+    result.macroGrams = overriddenMacros.macroGrams;
+  }
 
   const sexLabel = profile.sex === "male" ? tQuiz("sex_male") : tQuiz("sex_female");
   const goalLabel = profile.goal === "bulk" ? tQuiz("goal_bulk") : profile.goal === "cut" ? tQuiz("goal_cut") : tQuiz("goal_recomp");
@@ -108,6 +132,9 @@ export function AccountContent({ profile }: AccountContentProps) {
         goal={profile.goal as Goal}
         training={training}
         context="account"
+        customMeals={customMeals}
+        customFoods={customFoods}
+        weight={profile.weight!}
       />
     </div>
   );
