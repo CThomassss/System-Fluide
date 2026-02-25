@@ -92,14 +92,6 @@ export default function ResultsPage() {
       }
 
       try {
-        // Check if admin has overridden target calories
-        const { data: currentProfile } = await supabase
-          .from("profiles")
-          .select("target_calories_override")
-          .eq("id", user.id)
-          .single();
-        const isOverride = currentProfile?.target_calories_override === true;
-
         const { error } = await supabase
           .from("profiles")
           .update({
@@ -111,7 +103,7 @@ export default function ResultsPage() {
             goal: g,
             bmr: result.bmr,
             tdee: result.tdee,
-            ...(isOverride ? {} : { target_calories: result.targetCalories }),
+            target_calories: result.targetCalories,
             training_data: trainingData,
           })
           .eq("id", user.id);

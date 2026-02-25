@@ -24,7 +24,6 @@ interface Profile {
   training_data: string | null;
   custom_meals: string | null;
   target_calories: number | null;
-  target_calories_override: boolean | null;
 }
 
 interface CustomFoodData {
@@ -91,8 +90,8 @@ export function AccountContent({ profile, customFoods }: AccountContentProps) {
     training.days.length
   );
 
-  // If admin has overridden target calories, use the DB value
-  if (profile.target_calories_override && profile.target_calories) {
+  // If DB has a different target_calories (admin override), use it
+  if (profile.target_calories && profile.target_calories !== result.targetCalories) {
     result.targetCalories = profile.target_calories;
     const overriddenMacros = calculateMacros(profile.target_calories, profile.weight!, profile.goal as Goal);
     result.macros = overriddenMacros.macros;

@@ -14,7 +14,7 @@ import { TrainingEditor } from "./TrainingEditor";
 import { CustomFoodEditor, type CustomFood } from "./CustomFoodEditor";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
-import { ChevronDown, ChevronUp, Users, Save } from "lucide-react";
+import { ChevronDown, ChevronUp, Users, Save, Trash2 } from "lucide-react";
 import type { Sex, Goal, ActivityLevel } from "@/types/quiz";
 
 interface UserProfile {
@@ -30,7 +30,6 @@ interface UserProfile {
   bmr: number | null;
   tdee: number | null;
   target_calories: number | null;
-  target_calories_override: boolean | null;
   training_data: string | null;
   custom_meals: string | null;
   role: string | null;
@@ -42,11 +41,22 @@ interface AdminPanelProps {
   customFoods: CustomFood[];
 }
 
-export function AdminPanel({ users, customFoods }: AdminPanelProps) {
+export function AdminPanel({ users: initialUsers, customFoods }: AdminPanelProps) {
   const t = useTranslations("admin");
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  const [users, setUsers] = useState(initialUsers);
 
-  const nonAdminUsers = users.filter((u) => u.role !== "admin");
+  const handleDeleteUser = async (userId: string) => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+    if (!error) {
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      setExpandedUser(null);
+    }
+  };
 
   return (
     <div>
@@ -57,7 +67,7 @@ export function AdminPanel({ users, customFoods }: AdminPanelProps) {
 
       <div className="mt-4 flex items-center justify-center gap-2 text-sm text-foreground/50">
         <Users size={16} />
-        <span>{t("user_count", { count: nonAdminUsers.length })}</span>
+        <span>{t("user_count", { count: users.length })}</span>
       </div>
 
       <div className="mt-8">
@@ -65,16 +75,17 @@ export function AdminPanel({ users, customFoods }: AdminPanelProps) {
       </div>
 
       <div className="mt-8 space-y-4">
-        {nonAdminUsers.map((user) => (
+        {users.map((user) => (
           <UserRow
             key={user.id}
             user={user}
             customFoods={customFoods}
             isExpanded={expandedUser === user.id}
             onToggle={() => setExpandedUser(expandedUser === user.id ? null : user.id)}
+            onDelete={() => handleDeleteUser(user.id)}
           />
         ))}
-        {nonAdminUsers.length === 0 && (
+        {users.length === 0 && (
           <p className="text-center text-foreground/50">{t("no_users")}</p>
         )}
       </div>
@@ -87,15 +98,18 @@ function UserRow({
   customFoods,
   isExpanded,
   onToggle,
+  onDelete,
 }: {
   user: UserProfile;
   customFoods: CustomFood[];
   isExpanded: boolean;
   onToggle: () => void;
+  onDelete: () => void;
 }) {
   const t = useTranslations("admin");
   const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || "—";
   const goalMap: Record<string, string> = { bulk: "PDM", cut: "Seche", recomp: "Recomp" };
+  const isAdmin = user.role === "admin";
 
   return (
     <div className="rounded-2xl border border-surface-light bg-surface overflow-hidden">
@@ -115,6 +129,11 @@ function UserRow({
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {isAdmin && (
+            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+              Admin
+            </span>
+          )}
           {user.custom_meals && (
             <span className="rounded-full bg-green/10 px-2 py-0.5 text-xs font-semibold text-green">
               {t("custom_badge")}
@@ -124,13 +143,14 @@ function UserRow({
         </div>
       </button>
 
-      {isExpanded && <UserDetail user={user} customFoods={customFoods} />}
+      {isExpanded && <UserDetail user={user} customFoods={customFoods} onDelete={onDelete} />}
     </div>
   );
 }
 
-function UserDetail({ user, customFoods }: { user: UserProfile; customFoods: CustomFood[] }) {
+function UserDetail({ user, customFoods, onDelete }: { user: UserProfile; customFoods: CustomFood[]; onDelete: () => void }) {
   const t = useTranslations("admin");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Recompute results from profile data
   const canCompute =
@@ -151,17 +171,14 @@ function UserDetail({ user, customFoods }: { user: UserProfile; customFoods: Cus
       )
     : null;
 
-  // Target override state
+  // Use DB target_calories as effective target (admin can override it)
   const [customTarget, setCustomTarget] = useState<number>(
     user.target_calories ?? result?.targetCalories ?? 0
   );
   const [savingTarget, setSavingTarget] = useState(false);
   const [savedTarget, setSavedTarget] = useState(false);
 
-  const isOverride = user.target_calories_override === true;
-  const effectiveTarget = isOverride && user.target_calories
-    ? user.target_calories
-    : result?.targetCalories ?? 0;
+  const effectiveTarget = customTarget || result?.targetCalories || 0;
 
   const effectiveMacros = result
     ? (effectiveTarget !== result.targetCalories
@@ -175,10 +192,9 @@ function UserDetail({ user, customFoods }: { user: UserProfile; customFoods: Cus
     const supabase = createClient();
     await supabase
       .from("profiles")
-      .update({ target_calories: customTarget, target_calories_override: true })
+      .update({ target_calories: customTarget })
       .eq("id", user.id);
     user.target_calories = customTarget;
-    user.target_calories_override = true;
     setSavingTarget(false);
     setSavedTarget(true);
     setTimeout(() => setSavedTarget(false), 2000);
@@ -265,6 +281,34 @@ function UserDetail({ user, customFoods }: { user: UserProfile; customFoods: Cus
       <div className="mt-6">
         <TrainingEditor userId={user.id} initialTraining={training} />
       </div>
+
+      {/* Delete user */}
+      {user.role !== "admin" && (
+        <div className="mt-6 border-t border-surface-light pt-4">
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 cursor-pointer"
+            >
+              <Trash2 size={14} />
+              {t("delete_user")}
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-red-400">{t("delete_confirm")}</p>
+              <Button onClick={onDelete} className="bg-red-500 hover:bg-red-600 px-3 py-1.5 text-xs">
+                {t("delete_yes")}
+              </Button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-sm text-foreground/50 hover:text-foreground cursor-pointer"
+              >
+                {t("delete_cancel")}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

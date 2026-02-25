@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <>
       <Header />
-      <main className="flex min-h-[60vh] items-center justify-center px-4">
+      <main className="flex min-h-screen items-center justify-center px-4 pt-24 pb-8">
         <div className="w-full max-w-sm rounded-2xl border border-surface-light bg-surface p-6">
           <h1 className="font-display text-2xl font-bold text-center">{t("login_title")}</h1>
           <p className="mt-1 text-center text-sm text-foreground/60">{t("login_subtitle")}</p>

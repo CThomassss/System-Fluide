@@ -341,7 +341,11 @@
     "protein_short": "Prot /100g",
     "carbs_short": "Gluc /100g",
     "fat_short": "Lip /100g",
-    "add_custom_food": "Ajouter"
+    "add_custom_food": "Ajouter",
+    "delete_user": "Supprimer cet utilisateur",
+    "delete_confirm": "Confirmer la suppression ?",
+    "delete_yes": "Supprimer",
+    "delete_cancel": "Annuler"
   },
   "footer": {
     "copyright": "CEOLIN Coaching"

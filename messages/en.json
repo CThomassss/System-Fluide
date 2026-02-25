@@ -341,7 +341,11 @@
     "protein_short": "Prot /100g",
     "carbs_short": "Carbs /100g",
     "fat_short": "Fat /100g",
-    "add_custom_food": "Add"
+    "add_custom_food": "Add",
+    "delete_user": "Delete this user",
+    "delete_confirm": "Confirm deletion?",
+    "delete_yes": "Delete",
+    "delete_cancel": "Cancel"
   },
   "footer": {
     "copyright": "CEOLIN Coaching"

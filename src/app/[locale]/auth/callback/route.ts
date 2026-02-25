@@ -14,15 +14,6 @@ export async function GET(request: Request) {
     if (quizB64 && sessionData?.user) {
       try {
         const quiz = JSON.parse(atob(quizB64));
-
-        // Check if admin has overridden target calories
-        const { data: currentProfile } = await supabase
-          .from("profiles")
-          .select("target_calories_override")
-          .eq("id", sessionData.user.id)
-          .single();
-        const isOverride = currentProfile?.target_calories_override === true;
-
         await supabase
           .from("profiles")
           .update({
@@ -37,7 +28,7 @@ export async function GET(request: Request) {
             ...(quiz.last_name ? { last_name: quiz.last_name } : {}),
             ...(quiz.bmr ? { bmr: quiz.bmr } : {}),
             ...(quiz.tdee ? { tdee: quiz.tdee } : {}),
-            ...(!isOverride && quiz.target_calories ? { target_calories: quiz.target_calories } : {}),
+            ...(quiz.target_calories ? { target_calories: quiz.target_calories } : {}),
           })
           .eq("id", sessionData.user.id);
       } catch (e) {
