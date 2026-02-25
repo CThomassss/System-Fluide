@@ -26,7 +26,7 @@ export default async function AdminPage() {
   // Admin can read all profiles via RLS policy
   const { data: users, error: usersError } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, sex, height, weight, age, activity_level, goal, bmr, tdee, target_calories, target_calories_override, training_data, custom_meals, role, created_at")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (usersError) {
